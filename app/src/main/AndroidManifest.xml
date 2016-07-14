@@ -17,7 +17,7 @@
         <service android:enabled="true" android:exported="false" android:name="com.thq.pat.FxService"/>
         <activity android:label="@string/app_name"
             android:name="com.thq.pat.MainActivity"
-            android:theme="@android:style/Theme.Light.NoTitleBar">
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

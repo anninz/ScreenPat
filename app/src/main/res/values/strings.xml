@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">小虫爬呀爬</string>
+    <string name="app_name">屏幕宠物</string>
+    <string name="edit_pat_num">宠物数</string>
+    <string name="edit_shit_num">拉多少屎</string>
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_store">StoreActivity</string>
     <string name="title_activity_splash">SplashActivity</string>
+
+    <string name="denied_required_permission">"Permission denied. You can change permissions in Settings->Apps."</string>
+
 </resources>

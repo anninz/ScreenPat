@@ -6,6 +6,7 @@ import android.app.AlarmManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -98,10 +99,16 @@ public class FxService extends Service {
         mContentFactory.downloadContent();
         
         showInfo = new ShowInfo(this);
-        
+
+        SharedPreferences sp = getSharedPreferences("data", Context.MODE_PRIVATE);
+        int patSize = sp.getInt("patnum",1);
+        patSize = patSize < 4?patSize:3;
+
+
         HatchProvider hatchProvider = new HatchRoachFactory();
-        pats.add(hatchProvider.doHatch(this));
-        pats.add(hatchProvider.doHatch(this));
+        for (int i = 0; i < patSize; i++) {
+            pats.add(hatchProvider.doHatch(this));
+        }
 
         for (Pat pat:pats) {
             pat.startLife();

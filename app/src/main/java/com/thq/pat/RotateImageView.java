@@ -11,6 +11,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 
 public class RotateImageView extends View {
 
@@ -307,5 +308,12 @@ public class RotateImageView extends View {
                                 (int) height, matrix, true);
                 return bitmap;
         }
-        
+
+        public void setViewSize(int size) {
+            ViewGroup.LayoutParams mPatParams = getLayoutParams();
+            mPatParams.height = size;
+            mPatParams.width = size;
+            setLayoutParams(mPatParams);
+        }
+
     }

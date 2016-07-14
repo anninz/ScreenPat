@@ -149,7 +149,7 @@ public class HTMLParser {
         //add by hongqi begin
         for(Element link : miaopaiLink) {
             String attr = link.attr("action-data");
-            if (attr != null) {
+            if (attr != null && attr.length() > 0) {
                 attr = attr.substring(attr.indexOf("short_url")+10, attr.lastIndexOf("&"));
 //              System.out.println("--" + attr);
             }

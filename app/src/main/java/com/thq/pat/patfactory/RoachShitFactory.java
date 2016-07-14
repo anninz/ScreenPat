@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.Random;
 
 import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.util.DisplayMetrics;
@@ -109,8 +111,6 @@ public class RoachShitFactory extends AbsShitProvider {
         wmPatParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
     }
     
-    private int shitWidth = 30;
-    private int shitHeight = 30;
     private void createFloatView() {
         wmShitParams = new LayoutParams();
         //获取的是WindowManagerImpl.CompatModeWrapper
@@ -119,8 +119,12 @@ public class RoachShitFactory extends AbsShitProvider {
         LayoutInflater inflater = LayoutInflater.from(mContext.getApplication());
         mShitLayout = (FrameLayout) inflater.inflate(R.layout.shit_layout, null);
         initPatParams(wmShitParams);
-        wmShitParams.height = shitWidth;
-        wmShitParams.width = shitHeight;
+
+        SharedPreferences sp = mContext.getSharedPreferences("data", Context.MODE_PRIVATE);
+        int patSize =sp.getInt("size",45) / 2;
+
+        wmShitParams.height = patSize;
+        wmShitParams.width = patSize;
         wmShitParams.type = LayoutParams.TYPE_PHONE;
 /*        mFloatLayout.measure(View.MeasureSpec.makeMeasureSpec(0,
                 View.MeasureSpec.UNSPECIFIED), View.MeasureSpec

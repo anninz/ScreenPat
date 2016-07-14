@@ -5,6 +5,8 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.Handler;
@@ -16,6 +18,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
@@ -55,6 +58,7 @@ public class RoachPat extends AbsPat {
     
     boolean isPatDie = false;
     boolean isDoneCurrentTask = true;
+    int patSize = 45;
         
     public RoachPat(FxService fxService) {
         super(fxService);
@@ -72,6 +76,10 @@ public class RoachPat extends AbsPat {
         //设置监听浮动窗口的触摸移动
         myPatView.setOnTouchListener(mPatTouchListener);
         myPatView.setOnClickListener(mPatClickListener);
+
+        SharedPreferences sp = mContext.getSharedPreferences("data", Context.MODE_PRIVATE);
+        patSize =sp.getInt("size",45);
+        myPatView.setViewSize(patSize);
 
         mContext.addView(mFloatLayout, wmPatParams);
         
@@ -166,8 +174,8 @@ public class RoachPat extends AbsPat {
         //调整悬浮窗显示的停靠位置为左侧置顶
         wmPatParams.gravity = Gravity.LEFT | Gravity.TOP;       
         // 以屏幕左上角为原点，设置x、y初始值，相对于gravity
-        wmPatParams.x = 250;
-        wmPatParams.y = 250;
+        wmPatParams.x = mContext.minPixels / 2;
+        wmPatParams.y = mContext.maxPixels / 2;
 
         nextPatX = currentPatX = wmPatParams.x;
         nextPatY = currentPatY = wmPatParams.y;

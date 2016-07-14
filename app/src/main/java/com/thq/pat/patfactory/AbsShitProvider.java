@@ -16,7 +16,7 @@ public abstract class AbsShitProvider {
     FxService mContext;
     ArrayList<ImageView> mRecyledShits = new ArrayList<ImageView>();
     HashMap<Integer, ImageView> mShitMap = new HashMap<Integer, ImageView>();
-    int shitCount = 0;
+    static int shitCount = 0;
     final int MAX_SHIT_NUM = 20;
 
     public abstract void DoShit(int currentPatX, int currentPatY) ;
@@ -65,6 +65,7 @@ public abstract class AbsShitProvider {
             }
             mRecyledShits.remove(0);
         }
+        shitCount = 0;
         Log.d("THQ11", "recycleAllShit: mShitMap.size = " + mShitMap.size());
         return true;
     }
