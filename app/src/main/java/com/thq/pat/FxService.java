@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.app.AlarmManager;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -74,6 +75,7 @@ public class FxService extends Service {
     };
 
     ScreenListener mScreenListener;
+    ActionListener mActionListener;
     ContentFactory mContentFactory;
     ShowInfo showInfo;
     
@@ -93,8 +95,20 @@ public class FxService extends Service {
         minPixels = Math.min(metrics.heightPixels, metrics.widthPixels);
         
         mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
         mScreenListener = new ScreenListener(this);
         mScreenListener.begin(mScreenStateListener);
+
+        mActionListener = new ActionListener(this);
+        mActionListener.begin(new ActionListener.MyActionListener() {
+            @Override
+            public void action(String action) {
+                for (Pat pat:pats) {
+                    pat.command(action);
+                }
+            }
+        });
+
         mContentFactory = ContentFactory.getInstance();
         mContentFactory.downloadContent();
         
@@ -148,6 +162,7 @@ public class FxService extends Service {
         // TODO Auto-generated method stub
         super.onDestroy();
         mScreenListener.unregisterListener();
+        mActionListener.unregisterListener();
 
         if(pats != null) {
             for (Pat pat:pats) {

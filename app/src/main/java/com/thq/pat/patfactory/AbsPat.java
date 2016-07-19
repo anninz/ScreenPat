@@ -8,6 +8,8 @@ import com.thq.pat.FxService;
 public abstract class AbsPat implements Pat {
 
     FxService mContext;
+    public boolean isActive = true;
+
     public AbsPat(FxService fxService) {
         super();
         mContext = fxService;

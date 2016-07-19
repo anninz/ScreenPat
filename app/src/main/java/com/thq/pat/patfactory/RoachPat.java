@@ -23,6 +23,7 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.FrameLayout;
 
+import com.thq.pat.ActionListener;
 import com.thq.pat.FxService;
 import com.thq.pat.R;
 import com.thq.pat.RotateImageView;
@@ -111,6 +112,7 @@ public class RoachPat extends AbsPat {
 
     @Override
     public void sleep() {
+        isActive = false;
         handler.removeMessages(ActionSeries.IDLE);
         handler.removeMessages(ActionSeries.RUN);
         handler.removeMessages(ActionSeries.AMAZED);
@@ -122,7 +124,17 @@ public class RoachPat extends AbsPat {
 
     @Override
     public void wakeUp() {
+        isActive = true;
         handler.sendEmptyMessage(ActionSeries.IDLE);
+    }
+
+    @Override
+    public void command(String action) {
+        if (ActionListener.MY_ACTION_CHANGE_PAT_SIZE.equals(action)) {
+            SharedPreferences sp = mContext.getSharedPreferences("data", Context.MODE_PRIVATE);
+            patSize =sp.getInt("size",45);
+            myPatView.setViewSize(patSize);
+        }
     }
 
 
@@ -275,7 +287,7 @@ public class RoachPat extends AbsPat {
 //                    isDoneCurrentTask = true;
                     Log.i(TAG, "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++task is done.");
                     Action action = myActions.getNextAction();
-                    if (action != null) {
+                    if (isActive && action != null) {
                         action.Execute();
                     }
                     break;

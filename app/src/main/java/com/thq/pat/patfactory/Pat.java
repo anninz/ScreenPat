@@ -6,4 +6,5 @@ public interface Pat {
     public void endLife();
     public void sleep();
     public void wakeUp();
+    public void command(String action);
 }

@@ -1,8 +1,5 @@
 package com.thq.pat;
 
-import java.util.ArrayList;
-import java.util.Random;
-
 import android.graphics.PixelFormat;
 import android.os.Handler;
 import android.os.Message;
@@ -10,14 +7,20 @@ import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.thq.pat.image.ui.TouchView;
 import com.thq.pat.image.util.ImageDownload;
 import com.thq.pat.sina.provider.Tweet;
+
+import java.util.ArrayList;
+import java.util.Random;
 
 public class ShowInfo {
     
@@ -26,9 +29,12 @@ public class ShowInfo {
     FxService mContext;
     
     LayoutParams wmInfoParams;
-    LayoutParams wmNetImageParams;
+//    LayoutParams wmNetImageParams;
     TextView mShowInfo;
     TouchView netImage;
+    FrameLayout mLayout;
+
+    ImageButton mClose;
     
     Random mRandomGenerator;
     
@@ -54,25 +60,37 @@ public class ShowInfo {
     
     public void destroy() {
         if (mShowInfo != null) {
-            mContext.removeView(mShowInfo);
+            mContext.removeView(mLayout);
         }
         if (netImage != null) {
             Utils.recycleImageView(netImage);
-            mContext.removeView(netImage);
+//            mContext.removeView(netImage);
         }
     }
 
     private void createFloatView() {
         wmInfoParams = new LayoutParams();
-        wmNetImageParams = new LayoutParams();
-   
-        mShowInfo = new TextView(mContext);
+//        wmNetImageParams = new LayoutParams();
+
+        LayoutInflater inflater = LayoutInflater.from(mContext.getApplication());
+        mLayout = (FrameLayout) inflater.inflate(R.layout.show_info, null);
+        mShowInfo = (TextView) mLayout.findViewById(R.id.showinfo);
+        netImage = (TouchView) mLayout.findViewById(R.id.image_info);
+        mClose = (ImageButton) mLayout.findViewById(R.id.close_info);
+        mClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                handler.sendEmptyMessage(HIDE_INFO);
+            }
+        });
+
+//        mShowInfo = new TextView(mContext);
         //add for link
         mShowInfo.setAutoLinkMask(Linkify.ALL);
         mShowInfo.setMovementMethod(LinkMovementMethod.getInstance());
         
 //        mShowInfo.setBackgroundColor(0xFFCCE8CF);
-        mShowInfo.setBackgroundColor(0x90CCE8CF);
+//        mShowInfo.setBackgroundColor(0xDDCCE8CF);
 //        mShowInfo.setTextColor(0xFFF008CF);//fen se.
         mShowInfo.setTextColor(0xFF000000);
         wmInfoParams.format = PixelFormat.RGBA_8888; 
@@ -89,25 +107,25 @@ public class ShowInfo {
         wmInfoParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
 
         wmInfoParams.gravity = Gravity.LEFT | Gravity.TOP;
-        mShowInfo.setVisibility(View.GONE);
-        mContext.addView(mShowInfo, wmInfoParams); 
+//        mShowInfo.setVisibility(View.GONE);
+        mContext.addView(mLayout, wmInfoParams);
         
-        netImage = new TouchView(mContext);
-//        mShowInfo.setBackgroundColor(0xFFCCE8CF);
-//        netImage.setBackgroundColor(0x90CCE8CF);
-        wmNetImageParams.format = PixelFormat.RGBA_8888; 
-        wmNetImageParams.type = LayoutParams.TYPE_PHONE;
-        wmNetImageParams.flags = LayoutParams.FLAG_NOT_FOCUSABLE
-                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
-        wmNetImageParams.x = 0;
-        wmNetImageParams.y = 0;
-        wmNetImageParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
-//        wmInfoParams.height = minPixels/2;
-        wmNetImageParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        
-        wmNetImageParams.gravity = Gravity.LEFT | Gravity.BOTTOM;
-        netImage.setVisibility(View.GONE);
-        mContext.addView(netImage, wmNetImageParams);
+//        netImage = new TouchView(mContext);
+////        mShowInfo.setBackgroundColor(0xFFCCE8CF);
+////        netImage.setBackgroundColor(0x90CCE8CF);
+//        wmNetImageParams.format = PixelFormat.RGBA_8888;
+//        wmNetImageParams.type = LayoutParams.TYPE_PHONE;
+//        wmNetImageParams.flags = LayoutParams.FLAG_NOT_FOCUSABLE
+//                | WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+//        wmNetImageParams.x = 0;
+//        wmNetImageParams.y = 0;
+//        wmNetImageParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
+////        wmInfoParams.height = minPixels/2;
+//        wmNetImageParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+//
+//        wmNetImageParams.gravity = Gravity.LEFT | Gravity.BOTTOM;
+//        netImage.setVisibility(View.GONE);
+//        mContext.addView(netImage, wmNetImageParams);
     }
     
 
@@ -192,18 +210,18 @@ public class ShowInfo {
     
     private void showInfo() {
         mShowInfo.setText(mShowInfoText);
-        mShowInfo.setVisibility(View.VISIBLE);
+        mLayout.setVisibility(View.VISIBLE);
         if (hasImage) {
             netImage.setVisibility(View.VISIBLE);
         } else if (netImage.getVisibility() == View.VISIBLE) {
             hasImage = false;
-            netImage.setVisibility(View.INVISIBLE);
+            netImage.setVisibility(View.GONE);
         } 
     }
     private void hideInfo() {
-        mShowInfo.setVisibility(View.INVISIBLE);
+        mLayout.setVisibility(View.GONE);
         if (hasImage) {
-            netImage.setVisibility(View.INVISIBLE);
+            netImage.setVisibility(View.GONE);
             hasImage = false;
         }
     }

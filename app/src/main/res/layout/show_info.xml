@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:visibility="gone"
+    android:background="@android:color/transparent"
+    >
+    <com.thq.pat.common.ShadowLayout
+        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/shadowlayout"
+        app:sl_shadowRadius="6dp"
+        app:sl_shadowColor="@color/shadow"
+        app:sl_dx="0dp"
+        app:sl_dy="0dp"
+        app:sl_cornerRadius="1dp"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="@drawable/info_back"
+            >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/showinfo"
+            />
+        <com.thq.pat.image.ui.TouchView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/image_info"
+            android:layout_gravity="center_horizontal"
+            android:visibility="gone"/>
+
+
+        </LinearLayout>
+
+        <ImageButton
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:id="@+id/close_info"
+            android:layout_gravity="bottom|right"
+            android:src="@drawable/ic_add_white"
+            android:background="@drawable/fab_selector"
+            tools:ignore="ContentDescription"/>
+    </com.thq.pat.common.ShadowLayout>
+
+</FrameLayout>

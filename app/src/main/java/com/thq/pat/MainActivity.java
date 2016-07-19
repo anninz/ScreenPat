@@ -144,6 +144,10 @@ public class MainActivity extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
                 prePatView.setVisibility(View.GONE);
                 setSPInt("size", patSize);
+                Intent intent = new Intent();
+                intent.setClass(MainActivity.this, ActionListener.ActionBroadcastReceiver.class);
+                intent.setAction(ActionListener.MY_ACTION_CHANGE_PAT_SIZE);
+                sendBroadcast(intent);
                 Log.i(TAG, "user has finished a touch gesture");
                 //startTouch = false;
                 //Log.i(TAG, "onStopTrackingTouch():startTouch = "+startTouch);
