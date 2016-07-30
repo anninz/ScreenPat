@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -18,6 +20,9 @@ public abstract class AbsShitProvider {
     HashMap<Integer, ImageView> mShitMap = new HashMap<Integer, ImageView>();
     static int shitCount = 0;
     final int MAX_SHIT_NUM = 20;
+
+    Bitmap shitBitmap;
+    BitmapDrawable shitDrawable;
 
     public abstract void DoShit(int currentPatX, int currentPatY) ;
     public abstract void Clear() ;

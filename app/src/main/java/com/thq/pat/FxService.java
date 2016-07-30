@@ -20,6 +20,7 @@ import android.widget.ImageView;
 
 import com.thq.pat.ScreenListener.ScreenStateListener;
 import com.thq.pat.contentfactory.ContentFactory;
+import com.thq.pat.patfactory.HatchFlyFactory;
 import com.thq.pat.patfactory.HatchProvider;
 import com.thq.pat.patfactory.HatchRoachFactory;
 import com.thq.pat.patfactory.Pat;
@@ -34,19 +35,19 @@ public class FxService extends Service {
 
     private static final String TAG = "FxService";
 
-    final Handler handler =new Handler(){
+/*    final Handler handler =new Handler(){
         public void handleMessage(Message msg){
 
             switch (msg.what) {
-/*                case SHOW_INFO:
+*//*                case SHOW_INFO:
                     break;
                 case HIDE_INFO:
-                    break;*/
+                    break;*//*
                 default:
                     break;
             }
         }
-    };
+    };*/
 
     ScreenStateListener mScreenStateListener = new ScreenStateListener() {
 
@@ -116,13 +117,17 @@ public class FxService extends Service {
 
         SharedPreferences sp = getSharedPreferences("data", Context.MODE_PRIVATE);
         int patSize = sp.getInt("patnum",1);
-        patSize = patSize < 4?patSize:3;
+        patSize = patSize < 5?patSize:5;
 
 
         HatchProvider hatchProvider = new HatchRoachFactory();
         for (int i = 0; i < patSize; i++) {
             pats.add(hatchProvider.doHatch(this));
         }
+        HatchProvider FlyProvider = new HatchFlyFactory();
+/*        for (int i = 0; i < patSize; i++) {
+            pats.add(FlyProvider.doHatch(this));
+        }*/
 
         for (Pat pat:pats) {
             pat.startLife();

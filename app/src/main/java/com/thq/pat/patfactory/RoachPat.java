@@ -3,11 +3,15 @@ package com.thq.pat.patfactory;
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.animation.TypeEvaluator;
+import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
+import android.graphics.Point;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
@@ -21,6 +25,7 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 
 import com.thq.pat.ActionListener;
@@ -29,6 +34,7 @@ import com.thq.pat.R;
 import com.thq.pat.RotateImageView;
 import com.thq.pat.Utils;
 
+import java.util.Map;
 import java.util.Random;
 
 @SuppressLint("ClickableViewAccessibility")
@@ -39,7 +45,7 @@ public class RoachPat extends AbsPat {
     final static int UPDATE_PAT = 101;
     final static int UPDATE_PAT_DONE = 102;
     
-    int currentStatus = ActionSeries.IDLE;
+    int currentStatus = ActionManager.IDLE;
 //    int nextStatus = ActionSeries.UNKNOW_ACTION;
     
     //定义浮动窗口布局
@@ -60,9 +66,12 @@ public class RoachPat extends AbsPat {
     boolean isPatDie = false;
     boolean isDoneCurrentTask = true;
     int patSize = 45;
+
+    Map<String,Bitmap> mSkinMaps;
         
-    public RoachPat(FxService fxService) {
+    public RoachPat(FxService fxService, Map<String, Bitmap> skinMaps) {
         super(fxService);
+        mSkinMaps = skinMaps;
     }
 
     @Override
@@ -72,7 +81,11 @@ public class RoachPat extends AbsPat {
         //获取浮动窗口视图所在布局
         LayoutInflater inflater = LayoutInflater.from(mContext.getApplication());
         mFloatLayout = (FrameLayout) inflater.inflate(R.layout.pat_layout, null);
-        myPatView = (RotateImageView)mFloatLayout.findViewById(R.id.float_id);    
+//        myPatView = (RotateImageView)mFloatLayout.findViewById(R.id.float_id);
+        myPatView = new RotateImageView(mContext);
+        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(45,45);
+        myPatView.setLayoutParams(layoutParams);
+        mFloatLayout.addView(myPatView);
         
         //设置监听浮动窗口的触摸移动
         myPatView.setOnTouchListener(mPatTouchListener);
@@ -81,6 +94,8 @@ public class RoachPat extends AbsPat {
         SharedPreferences sp = mContext.getSharedPreferences("data", Context.MODE_PRIVATE);
         patSize =sp.getInt("size",45);
         myPatView.setViewSize(patSize);
+
+        myPatView.setSkin(mSkinMaps);
 
         mContext.addView(mFloatLayout, wmPatParams);
         
@@ -95,11 +110,11 @@ public class RoachPat extends AbsPat {
     public void endLife() {
         isPatDie = true;
 
-        handler.removeMessages(ActionSeries.RUN);
-        handler.removeMessages(ActionSeries.AMAZED);
-        handler.removeMessages(ActionSeries.SHIT);
+        handler.removeMessages(ActionManager.RUN);
+        handler.removeMessages(ActionManager.AMAZED);
+        handler.removeMessages(ActionManager.SHIT);
         handler.removeMessages(UPDATE_PAT);
-        handler.removeMessages(ActionSeries.QUESTION);
+        handler.removeMessages(ActionManager.QUESTION);
         handler.removeMessages(UPDATE_PAT_DONE);
 //        Utils.recycleImageView(myPatView);
         myPatView.onDestroy();
@@ -113,19 +128,19 @@ public class RoachPat extends AbsPat {
     @Override
     public void sleep() {
         isActive = false;
-        handler.removeMessages(ActionSeries.IDLE);
-        handler.removeMessages(ActionSeries.RUN);
-        handler.removeMessages(ActionSeries.AMAZED);
-        handler.removeMessages(ActionSeries.SHIT);
+        handler.removeMessages(ActionManager.IDLE);
+        handler.removeMessages(ActionManager.RUN);
+        handler.removeMessages(ActionManager.AMAZED);
+        handler.removeMessages(ActionManager.SHIT);
         handler.removeMessages(UPDATE_PAT);
-        handler.removeMessages(ActionSeries.QUESTION);
+        handler.removeMessages(ActionManager.QUESTION);
         handler.removeMessages(UPDATE_PAT_DONE);
     }
 
     @Override
     public void wakeUp() {
         isActive = true;
-        handler.sendEmptyMessage(ActionSeries.IDLE);
+        handler.sendEmptyMessage(ActionManager.IDLE);
     }
 
     @Override
@@ -137,7 +152,7 @@ public class RoachPat extends AbsPat {
         }
     }
 
-
+    boolean isDraged = false;
     OnTouchListener mPatTouchListener = new OnTouchListener() {
         
         @Override
@@ -156,6 +171,7 @@ public class RoachPat extends AbsPat {
             Log.i(TAG, "Y" + event.getY());
              //刷新
             mContext.updateView(mFloatLayout, wmPatParams);
+            isDraged = true;
             return false;  //此处必须返回false，否则OnClickListener获取不到监听
         }
     };
@@ -220,7 +236,7 @@ public class RoachPat extends AbsPat {
         }
     }
     
-    ActionSeries myActions = new ActionSeries() {
+    ActionManager myActions = new ActionManager() {
         
         @Override
         public void updateAction() {
@@ -246,27 +262,27 @@ public class RoachPat extends AbsPat {
         public void initAction() {
             oriActions.put("run", new Action("run", 50) {
                 public void Execute() {
-                    handler.sendEmptyMessageDelayed(ActionSeries.RUN, 10);
+                    handler.sendEmptyMessageDelayed(ActionManager.RUN, 10);
                 };
             });
             oriActions.put("idle", new Action("idle", 50) {
                 public void Execute() {
-                    handler.sendEmptyMessageDelayed(ActionSeries.IDLE, 1000);
+                    handler.sendEmptyMessageDelayed(ActionManager.IDLE, 1000);
                 };
             });
             oriActions.put("question", new Action("question", 50) {
                 public void Execute() {
-                    handler.sendEmptyMessageDelayed(ActionSeries.QUESTION, 10);
+                    handler.sendEmptyMessageDelayed(ActionManager.QUESTION, 10);
                 };
             });
             oriActions.put("amazed", new Action("amazed", 50) {
                 public void Execute() {
-                    handler.sendEmptyMessageDelayed(ActionSeries.AMAZED, 10);
+                    handler.sendEmptyMessageDelayed(ActionManager.AMAZED, 10);
                 };
             });
             oriActions.put("shit", new Action("shit", 50) {
                 public void Execute() {
-                    handler.sendEmptyMessageDelayed(ActionSeries.SHIT, 10);
+                    handler.sendEmptyMessageDelayed(ActionManager.SHIT, 10);
                 };
             });
             getNextAction().Execute();// first Execute.
@@ -277,12 +293,13 @@ public class RoachPat extends AbsPat {
         public void handleMessage(Message msg){
 
             switch (msg.what) {
-                case ActionSeries.RUN:
+                case ActionManager.RUN:
                     destX = mRandomGenerator.nextInt(mContext.minPixels);
                     destY = mRandomGenerator.nextInt(mContext.maxPixels);
-                    moveByLoyout();
+//                    moveByLoyout();
+                    moveByAnim();
                     break;
-                case ActionSeries.IDLE:
+                case ActionManager.IDLE:
 //                    nextStatus = ActionSeries.IDLE;
 //                    isDoneCurrentTask = true;
                     Log.i(TAG, "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++task is done.");
@@ -291,19 +308,20 @@ public class RoachPat extends AbsPat {
                         action.Execute();
                     }
                     break;
-                case ActionSeries.QUESTION:
+                case ActionManager.QUESTION:
                     handler.postDelayed(mSwitchPatPicRunnable, 100);
                     break;
-                case ActionSeries.AMAZED:
+                case ActionManager.AMAZED:
                     if (!isPatDie) {
-                        myPatView.setImageResource(R.drawable.pic8_surprise);
-                        myPatView.refreshDrawableState();
-                        handler.sendEmptyMessageDelayed(ActionSeries.IDLE, 3000);
+                        myPatView.execute(myPatView.action_surprise);
+//                        myPatView.setImageResource(R.drawable.pic8_surprise);
+//                        myPatView.refreshDrawableState();
+                        handler.sendEmptyMessageDelayed(ActionManager.IDLE, 3000);
                     }
                     break;
-                case ActionSeries.SHIT:
+                case ActionManager.SHIT:
                     shit();
-                    handler.sendEmptyMessageDelayed(ActionSeries.IDLE, 3000);
+                    handler.sendEmptyMessageDelayed(ActionManager.IDLE, 3000);
                     break;
                 case UPDATE_PAT:
                     doMoveAnimByLoyout();
@@ -326,56 +344,67 @@ public class RoachPat extends AbsPat {
             mShowAnimatorSet.playTogether(showAnimator);
             mShowAnimatorSet.setDuration(100l);
             Log.i(TAG, "TTT------------=======---- mThrowable ");
-            myPatView.setImageResource(R.drawable.pic8_question);
-            handler.sendEmptyMessageDelayed(ActionSeries.IDLE, 3000);
+//            myPatView.setImageResource(R.drawable.pic8_question);
+            myPatView.execute(myPatView.action_question);
+            handler.sendEmptyMessageDelayed(ActionManager.IDLE, 3000);
         }
     };
     
     private void updateNextPosition(int position) {
         switch (destGuadrant) {
         case 1:
+            if (isDraged) oriY = nextPatY - (int) (position * K);
             nextPatX++;
             nextPatY = oriY + (int) (position * K);
+
             break;
         case 2:
+            if (isDraged) oriX = nextPatX + (int) (position * K);
             nextPatY--;
             nextPatX = oriX - (int) (position * K);
-            
+
             break;
         case 3:
+            if (isDraged) oriX = nextPatX - (int) (position * K);
             nextPatY++;
             nextPatX = oriX + (int) (position * K);
-            
+
             break;
         case 4:
+            if (isDraged) oriY = nextPatY - (int) (position * K);
             nextPatX++;
             nextPatY = oriY + (int) (position * K);
-            
+
             break;
         case 5:
+            if (isDraged) oriY = nextPatY + (int) (position * K);
             nextPatX--;
             nextPatY = oriY - (int) (position * K);
-            
+
             break;
         case 6:
+            if (isDraged) oriX = nextPatX - (int) (position * K);
             nextPatY++;
             nextPatX = oriX + (int) (position * K);
-            
+
             break;
         case 7:
+            if (isDraged) oriY = nextPatY + (int) (position * K);
             nextPatX--;
             nextPatY = oriY - (int) (position * K);
-            
+
             break;
         case 8:
+            if (isDraged) oriX = nextPatX + (int) (position * K);
             nextPatY--;
             nextPatX = oriX - (int) (position * K);
-            
+
             break;
 
         default:
             break;
         }
+        isDraged = false;
     }
     
     
@@ -386,6 +415,79 @@ public class RoachPat extends AbsPat {
         if (shit == 1 ) {
             shitProvider.DoShit(currentPatX,currentPatY);
         }
+    }
+
+
+    private class PointEvaluator implements TypeEvaluator {
+
+        @Override
+        public Object evaluate(float fraction, Object startValue, Object endValue) {
+            Point startPoint = (Point) startValue;
+            Point endPoint = (Point) endValue;
+            if (isDraged) {
+                oriX = (int) (currentPatX - fraction*(endPoint.x - startPoint.x));
+                oriY = (int) (currentPatY - fraction*(endPoint.y - startPoint.y));
+                isDraged = false;
+            }
+            int x = (int) (oriX + fraction*(endPoint.x - startPoint.x));
+            int y = (int) (oriY + fraction*(endPoint.y - startPoint.y));
+            return new Point(x, y);
+        }
+    }
+
+    Point mPoint;
+    private void moveByAnim() {
+        Log.i(TAG, "moveByLoyout: ");
+        if (isPatDie) return;
+//        countStep = Math.min(Math.abs(destX - currentPatX), Math.abs(destY - currentPatY));
+//        stepX = Math.round(((float) destX - nextPatX)/countStep);
+//        stepY = Math.round(((float) destY - nextPatY)/countStep);
+
+        oriX = currentPatX;
+        oriY = currentPatY;
+
+        mMoveDuration = mRandomGenerator.nextInt(4000) +500;
+        K = Utils.getK(oriX, oriY, destX, destY, destGuadrant);
+
+        destGuadrant = Utils.getQuadrant(oriX, oriY, destX, destY);
+
+        myPatView.setDegree((float) Utils.getAngle(destX, destY, currentPatX, currentPatY));
+
+        ValueAnimator xValue =  ValueAnimator.ofObject(new PointEvaluator(),new Point(oriX,oriY),new Point(destX,destY));
+        xValue.setDuration(mMoveDuration);
+        xValue.setInterpolator(new LinearInterpolator());
+        xValue.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                mPoint = (Point) animation.getAnimatedValue();
+                nextPatX = mPoint.x;
+                nextPatY = mPoint.y;
+                handler.sendEmptyMessageDelayed(UPDATE_PAT, 10);
+//                System.out.println("debug:(x,y) = " + nextPatX + "," + nextPatY);
+            }
+        });
+        xValue.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) { }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                handler.sendEmptyMessageDelayed(UPDATE_PAT_DONE, 10);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) { }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) { }
+        });
+        xValue.setInterpolator(new LinearInterpolator());
+        xValue.start();
+
+        shit();
+        doPatAnim();
+
     }
     
     int mMoveDuration = 10;
@@ -465,8 +567,9 @@ public class RoachPat extends AbsPat {
     @SuppressLint("NewApi")
     private void doPatAnim() {
 
-        int[] drawables = {R.drawable.pic8_move,R.drawable.pic8};
-        myPatView.startAnim(drawables);
+//        int[] drawables = {R.drawable.pic8_move,R.drawable.pic8};
+//        myPatView.startAnim(drawables);
+        myPatView.execute(myPatView.action_move);
         
 //      myPatView.setBackgroundResource(R.drawable.move_anim);
 //        AnimationDrawable animator = (AnimationDrawable) myPatView.getBackground();
@@ -485,9 +588,10 @@ public class RoachPat extends AbsPat {
         if (myPatView == null) {
             return;
         }
-        myPatView.setImageResource(R.drawable.pic8);
-        myPatView.stopAnim();
-        handler.sendEmptyMessageDelayed(ActionSeries.IDLE, 3000);
+//        myPatView.setImageResource(R.drawable.pic8);
+        myPatView.execute(myPatView.action_normal);
+//        myPatView.stopAnim();
+        handler.sendEmptyMessageDelayed(ActionManager.IDLE, 3000);
     }
     
     private void doMoveAnimByLoyout() {

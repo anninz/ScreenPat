@@ -8,7 +8,9 @@ import java.util.Random;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.BitmapFactory;
 import android.graphics.PixelFormat;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -40,6 +42,8 @@ public class RoachShitFactory extends AbsShitProvider {
     
     public RoachShitFactory(FxService fxService) {
         super(fxService);
+        shitBitmap = BitmapFactory.decodeResource(fxService.getResources(), R.drawable.shit);
+        shitDrawable = new BitmapDrawable(fxService.getResources(), shitBitmap);
         createFloatView();
     }
 
@@ -64,7 +68,8 @@ public class RoachShitFactory extends AbsShitProvider {
         } else {
             shitCount ++;
             imageView = new ImageView(mContext);
-            imageView.setImageResource(R.drawable.shit);
+//            imageView.setImageResource(R.drawable.shit);//0728
+            imageView.setImageDrawable(shitDrawable);
             imageView.setOnClickListener(new OnClickListener() 
             {
                 

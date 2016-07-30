@@ -145,7 +145,8 @@ public class MainActivity extends AppCompatActivity {
                 prePatView.setVisibility(View.GONE);
                 setSPInt("size", patSize);
                 Intent intent = new Intent();
-                intent.setClass(MainActivity.this, ActionListener.ActionBroadcastReceiver.class);
+                intent.setPackage(getPackageName());
+//                intent.setClass(MainActivity.this, ActionListener.ActionBroadcastReceiver.class);//Warning:cant avaiable via the way,
                 intent.setAction(ActionListener.MY_ACTION_CHANGE_PAT_SIZE);
                 sendBroadcast(intent);
                 Log.i(TAG, "user has finished a touch gesture");

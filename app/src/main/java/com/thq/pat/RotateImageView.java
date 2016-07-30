@@ -13,6 +13,9 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.text.DecimalFormat;
+import java.util.Map;
+
 public class RotateImageView extends View {
 
         public float degree = 0;
@@ -34,21 +37,90 @@ public class RotateImageView extends View {
             init();
         }
         
-       int circleHeight ,circleWidth;
-       
-       
+
        @Override
        protected void onDraw(Canvas canvas) {
-           
+
+           switch (COMMAND) {
+               case action_normal:
+                  rotatBitmap = normal;
+                   isAniming = false;
+                   break;
+               case action_question:
+                   rotatBitmap = question;
+                   break;
+               case action_surprise:
+                   rotatBitmap = surprise;
+                   break;
+               case action_move:
+                   isAniming = true;
+                   break;
+               default:
+                   rotatBitmap = normal;
+           }
+
            if (isAniming) {
                rotatBitmap = bitmaps[index];
                index = index == 0 ? 1:0; 
+//               Log.d("THQ draw", "drawable = "+rotatBitmap + "  bitmap.getWidth() = " + rotatBitmap.getWidth());
+           }
+
+
+           if (rotatBitmap != null) {
+               ifNeedUpdateMatrix();
+
+               //抗锯齿
+               canvas.setDrawFilter(pfd);
+
+               canvas.drawBitmap(rotatBitmap, matrix, paint);
+           }
+           super.onDraw(canvas);
+           if (isAniming)postInvalidateDelayed(200);
+       }
+
+    Matrix matrix = new Matrix();
+    private void ifNeedUpdateMatrix() {
+
+        if (oldDegree == degree && !sizeChange) {
+            return;
+        }
+
+        oldDegree = degree;
+        sizeChange = false;
+
+//        Matrix matrix = new Matrix();
+        // 设置转轴位置
+        matrix.setTranslate((float)bitmapSize / 2, (float)bitmapSize / 2);
+
+        // 开始转
+        matrix.preRotate(degree);
+        // 转轴还原
+        matrix.preTranslate(-(float)bitmapSize / 2, -(float)bitmapSize / 2);
+
+        //scale view
+        matrix.postScale(scaleX, scaleY, bitmapSize / 2f, bitmapSize / 2f);
+
+        // 将位置送到view的中心
+//        matrix.postTranslate(-(float)(bitmapSize - width) / 2, -(float)(bitmapSize - height) / 2);
+//        matrix.postTranslate(-transform / 2f,  -transform/ 2f);
+        matrix.postTranslate(-transform,  -transform);
+        Log.d("THQ1", "onDraw: " + bitmapSize+ " " + width + " " +scaleX + " " + transform);
+    }
+/*
+       @Override
+       protected void onDraw(Canvas canvas) {
+
+           if (isAniming) {
+               rotatBitmap = bitmaps[index];
+               index = index == 0 ? 1:0;
                Log.d("THQ draw", "drawable = "+rotatBitmap + "  bitmap.getWidth() = " + rotatBitmap.getWidth());
            }
            if (rotatBitmap != null) {
-               /*rotatBitmap = bitmap;Bitmap.createBitmap(bitmap, 0, 0,
+               */
+/*rotatBitmap = bitmap;Bitmap.createBitmap(bitmap, 0, 0,
                        20, 20,
-                       matrix, false);*/
+                       matrix, false);*//*
+
                Log.d("THQ draw33", "drawable = "+rotatBitmap + "  rotatBitmap.getWidth() = " + rotatBitmap.getWidth() + " degree = " + degree);
                initSize();
 
@@ -72,6 +144,7 @@ public class RotateImageView extends View {
            super.onDraw(canvas);
            if (isAniming)postInvalidateDelayed(200);
        }
+*/
 
        Paint paint=new Paint();
        
@@ -131,10 +204,11 @@ public class RotateImageView extends View {
             if (isAniming)invalidate();
         }*/
 
-        public void setDegree(float degree) {
-            this.degree = degree;
-            invalidate();
-        }
+    float oldDegree = 0;
+    public void setDegree(float degree) {
+        this.degree = degree;
+        invalidate();
+    }
 
 
     public void onDestroy() {
@@ -147,8 +221,11 @@ public class RotateImageView extends View {
         Bitmap[] bitmaps;
         boolean isAniming = false;
         int index = 0;
+        int lastImgRes = -1;
+        int[] lastDrawables;
         
         public void startAnim(int[] drawables) {
+            lastDrawables = drawables;
             if (bitmaps == null) {
                 Bitmap[] bitmaps1 = new Bitmap[drawables.length];
                 for (int i = 0; i < drawables.length; i++) {
@@ -161,6 +238,7 @@ public class RotateImageView extends View {
         }
         
         public void setImageResource(int id) {
+            lastImgRes = id;
             rotatBitmap = res2bitmap(id);
             initSize();
             postInvalidate();
@@ -248,19 +326,36 @@ public class RotateImageView extends View {
          */
         float o_y; 
         
+//        private void initSize() {
+//            if (rotatBitmap == null) {
+//                return;
+//            }
+//            width = rotatBitmap.getWidth();
+//            height = rotatBitmap.getHeight();
+//
+////            maxwidth = Math.sqrt(width * width + height * height);//hongqi
+//            maxwidth = width;//hongqi
+//
+//            o_x = o_y = (float)(maxwidth / 2);//确定圆心坐标
+//        }
+
         private void initSize() {
-            if (rotatBitmap == null) {
-                return;
-            }
-            width = rotatBitmap.getWidth();
-            height = rotatBitmap.getHeight();
+            width = getWidth();
+            height = getHeight();
 
 //            maxwidth = Math.sqrt(width * width + height * height);//hongqi
-            maxwidth = width;//hongqi
-            
-            o_x = o_y = (float)(maxwidth / 2);//确定圆心坐标
         }
-        
+
+    float transform;
+        private void initSize(int size) {
+            width = size;
+            height = size;
+//            double min = Math.sqrt(width * width + height * height);//hongqi
+//            double max = Math.sqrt(2*bitmapSize*bitmapSize);//hongqi
+//            transform = (float)(max - min);
+            transform = (bitmapSize - height) / 2f;
+        }
+
 
         public void setRotatBitmap(Bitmap bitmap) {
             rotatBitmap = bitmap;
@@ -309,11 +404,66 @@ public class RotateImageView extends View {
                 return bitmap;
         }
 
+    boolean sizeChange = false;
         public void setViewSize(int size) {
             ViewGroup.LayoutParams mPatParams = getLayoutParams();
             mPatParams.height = size;
             mPatParams.width = size;
             setLayoutParams(mPatParams);
+            scaleX = scaleY = (float) (size -size/5) / bitmapSize;
+            initSize(size);
+            sizeChange = true;
+//            scaleX = (float) getWidth() / rotatBitmap.getWidth();
+//
+//            if (lastImgRes > 0) {
+//                rotatBitmap = res2bitmap(lastImgRes);
+//                initSize();
+//
+//                if (lastDrawables != null) {
+//                    Bitmap[] bitmaps1 = new Bitmap[lastDrawables.length];
+//                    for (int i = 0; i < lastDrawables.length; i++) {
+//                        int j = lastDrawables[i];
+//                        bitmaps1[i] = res2bitmap(j);
+//                    }
+//                    bitmaps = bitmaps1;
+//                }
+//                postInvalidate();
+//            }
+            postInvalidate();
         }
 
+    Bitmap normal;
+    Bitmap question;
+    Bitmap surprise;
+    Bitmap move;
+    float scaleX,scaleY;
+    int bitmapSize;
+    public void setSkin(Map<String,Bitmap> map) {
+        if (map == null) return;
+//        normal = zoomImage(map.get("normal"),150,150);
+//        question = zoomImage(map.get("question"),150,150);
+//        surprise = zoomImage(map.get("surprise"),150,150);
+//        move = zoomImage(map.get("move"),150,150);
+        normal = map.get("normal");
+        question = map.get("question");
+        surprise = map.get("surprise");
+        move = map.get("move");
+        bitmaps = new Bitmap[2];
+        bitmaps[0] = move;
+        bitmaps[1] = normal;
+        bitmapSize = normal.getHeight();
+        scaleX = scaleY = (float) (height - height/5) / bitmapSize;
+        initSize(height);
     }
+
+    final public  int action_normal = 0;
+    final public  int action_question = 1;
+    final public int action_surprise = 2;
+    final public  int action_move = 3;
+    int COMMAND = 0;
+
+    public void execute(int command) {
+        COMMAND = command;
+        invalidate();
+    }
+}
