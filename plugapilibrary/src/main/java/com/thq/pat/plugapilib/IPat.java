@@ -1,6 +1,6 @@
-package com.thq.pat.patfactory;
+package com.thq.pat.plugapilib;
 
-public interface Pat {
+public interface IPat {
 
     public void startLife();
     public void endLife();

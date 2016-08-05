@@ -5,17 +5,20 @@ import android.graphics.BitmapFactory;
 
 import com.thq.pat.FxService;
 import com.thq.pat.R;
+import com.thq.pat.plugapilib.IHatchProvider;
+import com.thq.pat.plugapilib.IPat;
+import com.thq.pat.plugapilib.IPlugAPI;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class HatchRoachFactory implements HatchProvider {
+public class HatchRoachFactory implements IHatchProvider {
 
     @Override
-    public Pat doHatch(FxService fxService) {
+    public IPat doHatch(IPlugAPI fxService) {
         // TODO Auto-generated method stub
-        productSkin(fxService);
-        return new RoachPat(fxService,skinMaps);
+        productSkin((FxService)fxService);
+        return new RoachPat((FxService)fxService,skinMaps);
     }
 
     public void productSkin(FxService fxService) {

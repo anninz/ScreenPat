@@ -1,16 +1,16 @@
 package com.thq.pat;
 
+import java.io.File;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import android.app.AlarmManager;
-import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Message;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
@@ -21,11 +21,14 @@ import android.widget.ImageView;
 import com.thq.pat.ScreenListener.ScreenStateListener;
 import com.thq.pat.contentfactory.ContentFactory;
 import com.thq.pat.patfactory.HatchFlyFactory;
-import com.thq.pat.patfactory.HatchProvider;
+import com.thq.pat.plugapilib.IHatchProvider;
 import com.thq.pat.patfactory.HatchRoachFactory;
-import com.thq.pat.patfactory.Pat;
+import com.thq.pat.plugapilib.IPat;
+import com.thq.pat.plugapilib.IPlugAPI;
 
-public class FxService extends Service {
+import dalvik.system.DexClassLoader;
+
+public class FxService extends BaseService implements IPlugAPI {
 
 
     //创建浮动窗口设置布局参数的对象
@@ -53,7 +56,7 @@ public class FxService extends Service {
 
         @Override
         public void onScreenOn() {
-            for (Pat pat:pats) {
+            for (IPat pat:pats) {
                 pat.wakeUp();
             }
             Log.d(TAG, "onScreenOn ");
@@ -61,7 +64,7 @@ public class FxService extends Service {
 
         @Override
         public void onScreenOff() {
-            for (Pat pat:pats) {
+            for (IPat pat:pats) {
                 pat.sleep();
             }
             Log.d(TAG, "onScreenOff ");
@@ -80,7 +83,7 @@ public class FxService extends Service {
     ContentFactory mContentFactory;
     ShowInfo showInfo;
     
-    ArrayList<Pat> pats = new ArrayList<Pat>();
+    ArrayList<IPat> pats = new ArrayList<IPat>();
     private AlarmManager mAlarmManager;
     
     @Override
@@ -104,7 +107,7 @@ public class FxService extends Service {
         mActionListener.begin(new ActionListener.MyActionListener() {
             @Override
             public void action(String action) {
-                for (Pat pat:pats) {
+                for (IPat pat:pats) {
                     pat.command(action);
                 }
             }
@@ -115,22 +118,72 @@ public class FxService extends Service {
         
         showInfo = new ShowInfo(this);
 
-        SharedPreferences sp = getSharedPreferences("data", Context.MODE_PRIVATE);
-        int patSize = sp.getInt("patnum",1);
-        patSize = patSize < 5?patSize:5;
+//        SharedPreferences sp = getSharedPreferences("data", Context.MODE_PRIVATE);
+//        int patSize = sp.getInt("patnum",1);
+//        patSize = patSize < 5?patSize:5;
 
 
-        HatchProvider hatchProvider = new HatchRoachFactory();
-        for (int i = 0; i < patSize; i++) {
-            pats.add(hatchProvider.doHatch(this));
-        }
-        HatchProvider FlyProvider = new HatchFlyFactory();
-/*        for (int i = 0; i < patSize; i++) {
-            pats.add(FlyProvider.doHatch(this));
-        }*/
+//        IHatchProvider hatchProvider = new HatchRoachFactory();
+//        for (int i = 0; i < patSize; i++) {
+//            pats.add(hatchProvider.doHatch(this));
+//        }
+//        IHatchProvider FlyProvider = new HatchFlyFactory();
+//        for (int i = 0; i < patSize; i++) {
+//            pats.add(FlyProvider.doHatch(this));
+//        }
+        LoadClass();
 
-        for (Pat pat:pats) {
+        for (IPat pat:pats) {
             pat.startLife();
+        }
+    }
+
+    DexClassLoader classLoader = null;
+    private void LoadClass() {
+//        String dexOutputDir = getApplicationInfo().dataDir;
+//        String apkdir = "/data/data/" + getPackageName() + "/dynamicapk" ;
+//        String DynamicApkPath = apkdir + File.separator + "plugapk-release-unsigned.apk";
+//        Log.d("THHQ", dexOutputDir + " " + " " + new File(DynamicApkPath).exists() +" " + new File(apkdir).mkdir());
+
+        SharedPreferences sp = getSharedPreferences("data", Context.MODE_PRIVATE);
+        Set<String> set = new HashSet<>();
+        set = sp.getStringSet("PatSet",set);
+        final File tmpDir = getDir("dex", 0);
+        for (String string:set) {
+
+            String[] strings = string.split("#");
+
+            if ("Host".equals(strings[1])) {
+                IHatchProvider hatchProvider = new HatchRoachFactory();
+                for (int i = 0; i < Integer.decode(strings[0]); i++) {
+                    pats.add(hatchProvider.doHatch(this));
+                }
+                continue;
+            }
+
+            File dir = new File(strings[1]);
+            if (!dir.exists()) continue;
+            String filePath = dir.getPath();
+//        if (new File(DynamicApkPath).exists()) {
+            classLoader = new DexClassLoader(filePath, tmpDir.getAbsolutePath(), null,getClassLoader());
+//        }
+
+//            String filePath = "/data/data/" + getPackageName() + "/dynamicapk" + "/plugapk-release-unsigned.apk";
+            loadResources(filePath);
+
+            try{
+                if (classLoader != null) {
+                    Class clazz = classLoader.loadClass("com.thq.pat.plug.HatchFactory");
+//                Method method = clazz.getMethod("getTextString", Context.class);
+//                String str = (String) method.invoke(null, this);
+                    IHatchProvider FlyProvider = (IHatchProvider)clazz.newInstance();
+                    for (int i = 0; i < Integer.decode(strings[0]); i++) {
+                        pats.add(FlyProvider.doHatch(this));
+                    }
+                }
+            }catch(Exception e){
+                Log.i("Loader", "error:"+Log.getStackTraceString(e));
+            }
         }
     }
 
@@ -170,7 +223,7 @@ public class FxService extends Service {
         mActionListener.unregisterListener();
 
         if(pats != null) {
-            for (Pat pat:pats) {
+            for (IPat pat:pats) {
                 pat.endLife();
             }
         }
@@ -191,8 +244,20 @@ public class FxService extends Service {
         mWindowManager.removeView(view);
     }
 
+    @Override
+    public int getInt(String key, int id) {
+        SharedPreferences sp = getSharedPreferences("data", Context.MODE_PRIVATE);
+        return sp.getInt("size",45);
+    }
+
     public void updateView(ImageView view, LayoutParams layoutParams) {
         mWindowManager.updateViewLayout(view, layoutParams);
+    }
+
+    @Override
+    public Context getContext() {
+//        T.pt("","");
+        return getApplicationContext();
     }
 
     public void updateShowInfo(int index) {

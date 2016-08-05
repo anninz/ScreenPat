@@ -122,7 +122,7 @@ public class RoachShitFactory extends AbsShitProvider {
 //        Toast.makeText(this, "" + maxPixels, Toast.LENGTH_LONG).show();
         
         LayoutInflater inflater = LayoutInflater.from(mContext.getApplication());
-        mShitLayout = (FrameLayout) inflater.inflate(R.layout.shit_layout, null);
+//        mShitLayout = (FrameLayout) inflater.inflate(R.layout.shit_layout, null);
         initPatParams(wmShitParams);
 
         SharedPreferences sp = mContext.getSharedPreferences("data", Context.MODE_PRIVATE);

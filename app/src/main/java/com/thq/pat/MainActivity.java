@@ -12,10 +12,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.thq.pat.permission.PermissionManager;
@@ -61,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
             {
                 // TODO Auto-generated method stub
                 Intent intent = new Intent(MainActivity.this, FxService.class);
-                String num = patNum.getText().toString();
+                String num = "1";//patNum.getText().toString();
                 setSPInt("patnum",Integer.parseInt("".equals(num)?"1":num));
                 //启动FxService
                 startService(intent);
@@ -82,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        patNum = (EditText) findViewById(R.id.edit_text_patnum);
+//        patNum = (EditText) findViewById(R.id.edit_text_patnum);
 //        patNum.setInputType(EditorInfo.TYPE_CLASS_PHONE);
 
         seekBarAlphe = (SeekBar) findViewById(R.id.seekBar1);
@@ -154,6 +156,15 @@ public class MainActivity extends AppCompatActivity {
                 //Log.i(TAG, "onStopTrackingTouch():startTouch = "+startTouch);
                 //handler.removeCallbacks(mHideRunnable);
                 //handler.postDelayed(mHideRunnable, 3000);
+            }
+        });
+
+        findViewById(R.id.select_pat).setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClass(MainActivity.this, ChoosePatActivity.class);
+                startActivity(intent);
             }
         });
 

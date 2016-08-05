@@ -2,14 +2,14 @@ package com.thq.pat.patfactory;
 
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.thq.pat.FxService;
+import com.thq.pat.plugapilib.IPat;
 
-public abstract class AbsPat implements Pat {
+public abstract class AbsPat implements IPat {
 
     FxService mContext;
     public boolean isActive = true;
@@ -29,7 +29,7 @@ public abstract class AbsPat implements Pat {
         
         public abstract void Execute();
     }
-    
+
     public abstract class ActionManager {
         
         final static int MAX_ACTION_NUMS = 30; 
@@ -66,7 +66,7 @@ public abstract class AbsPat implements Pat {
                         break;
                     case IDLE:
                         defaultAction.Execute();
-                        handler.sendEmptyMessage(NEXTACTION);
+                        handler.sendEmptyMessageDelayed(NEXTACTION, defaultAction.actionDuration);
                         break;
                     default:
                         break;

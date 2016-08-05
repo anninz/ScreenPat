@@ -5,19 +5,22 @@ import android.graphics.BitmapFactory;
 
 import com.thq.pat.FxService;
 import com.thq.pat.R;
+import com.thq.pat.plugapilib.IHatchProvider;
+import com.thq.pat.plugapilib.IPat;
+import com.thq.pat.plugapilib.IPlugAPI;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class HatchFlyFactory implements HatchProvider {
+public class HatchFlyFactory implements IHatchProvider {
 
     @Override
-    public Pat doHatch(FxService fxService) {
+    public IPat doHatch(IPlugAPI fxService) {
         // TODO Auto-generated method stub
-        productSkin(fxService);
-        return new FlyPat(fxService,skinMaps);
+        productSkin((FxService)fxService);
+        return new FlyPat((FxService)fxService,skinMaps);
     }
 
     public void productSkin(FxService fxService) {
