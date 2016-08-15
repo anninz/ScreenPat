@@ -1,5 +1,7 @@
 package com.thq.pat.qiushi;
 
+import android.util.Log;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -7,11 +9,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import android.util.Log;
 
 //搜索Web爬行者
 public class QiuShiBaiKe implements Runnable{
@@ -74,6 +73,8 @@ Disallow: /login
             HttpURLConnection hConnect = (HttpURLConnection) pageUrl.openConnection();
             //      hConnect.setDefaultRequestProperty("http.agent", "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT");
             hConnect.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT");
+//            hConnect.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 6.0; ONE TOUCH 4033X Build/MRA58K; wv) AppleWebKit/537.36" +
+//                    "(KHTML, like Gecko) Version/4.0 Chrome/44.0.2403.119 Mobile Safari/537.36");
 
             // 读取内容
 
@@ -126,7 +127,7 @@ Disallow: /login
             String link2 = m.group(2).trim();
             String link3 = m.group(3).trim();
             String link4 = m.group(4).trim();
-            String content = " 作者： " + link1 + " \n\n " + link2 + " \n 赞：" + link4 + "\n\n" + " 来源：糗事百科";
+            String content = " 作者： " + link1 + " \n\n " + link2 + " \n 赞：" + link4 + "\n" + link3 + "\n\n" + " 来源：糗事百科";
 //            System.out.println(content);
 
             linkList.add(content);

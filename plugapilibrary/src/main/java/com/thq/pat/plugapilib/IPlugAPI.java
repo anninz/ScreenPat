@@ -3,6 +3,7 @@ package com.thq.pat.plugapilib;
 import android.app.Application;
 import android.content.Context;
 import android.content.res.Resources;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -18,4 +19,5 @@ public interface IPlugAPI {
     public int getInt(String key, int id);
     public Resources getResources();
     public Application getApplication();
+    public void detectGesture(MotionEvent motionEvent);
 }

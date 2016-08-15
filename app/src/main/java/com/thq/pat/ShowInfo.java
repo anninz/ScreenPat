@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import com.thq.pat.image.ui.TouchView;
 import com.thq.pat.image.util.ImageDownload;
+import com.thq.pat.plugapilib.Utils;
 import com.thq.pat.sina.provider.Tweet;
 
 import java.util.ArrayList;
@@ -72,7 +73,7 @@ public class ShowInfo {
         wmInfoParams = new LayoutParams();
 //        wmNetImageParams = new LayoutParams();
 
-        LayoutInflater inflater = LayoutInflater.from(mContext.getApplication());
+        LayoutInflater inflater = LayoutInflater.from(mContext);
         mLayout = (FrameLayout) inflater.inflate(R.layout.show_info, null);
         mShowInfo = (TextView) mLayout.findViewById(R.id.showinfo);
         netImage = (TouchView) mLayout.findViewById(R.id.image_info);
@@ -84,9 +85,8 @@ public class ShowInfo {
             }
         });
 
-//        mShowInfo = new TextView(mContext);
         //add for link
-        mShowInfo.setAutoLinkMask(Linkify.ALL);
+        mShowInfo.setAutoLinkMask(Linkify.WEB_URLS);
         mShowInfo.setMovementMethod(LinkMovementMethod.getInstance());
         
 //        mShowInfo.setBackgroundColor(0xFFCCE8CF);
@@ -159,7 +159,7 @@ public class ShowInfo {
                + (!videoLink.equals("null")?videoLink:"")  + "\n\n" 
                +  "来源：新浪微博"
                ;
-                mShowInfoDuration = 20000;
+                mShowInfoDuration = 60000;
                 if (tweet.getPicLink() != null && !tweet.getPicLink().contains("null")) {
                     Log.i(TAG, "THQ hasiamge loading ...");
                     hasImage = true;
@@ -177,7 +177,7 @@ public class ShowInfo {
             if (indexOfQiuShi >= 0) {
                 mShowInfoText = mQiushiList.get(indexOfQiuShi)
                         /*+  "来源：糗事百科" + "\n" */;
-                mShowInfoDuration = 20000;
+                mShowInfoDuration = 60000;
             } else {
                 mShowInfoText = "下次遛我的时候，记得开网络哦，有惊喜...";
             }

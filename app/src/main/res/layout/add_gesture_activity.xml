@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center_horizontal"
+    >
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="请在下面屏幕上绘制手势"
+        />
+    <!--该参数指定是否一笔完成，single为一笔完成-->
+    <android.gesture.GestureOverlayView
+        android:id="@+id/gesture"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+    android:gestureStrokeType="multiple"
+    />
+</LinearLayout>

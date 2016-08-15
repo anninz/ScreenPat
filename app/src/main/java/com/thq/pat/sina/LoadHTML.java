@@ -1,10 +1,10 @@
 package com.thq.pat.sina;
 
+import android.util.Log;
+
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.URISyntaxException;
 import java.net.URL;
 
 //import org.apache.http.HttpHost;
@@ -29,8 +29,6 @@ import java.net.URL;
 //import org.apache.http.impl.cookie.BrowserCompatSpecFactory;
 //import org.apache.http.protocol.HttpContext;
 //import org.apache.http.util.EntityUtils;
-
-import android.util.Log;
 
 /** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
  * @filename LoadHTML.java
@@ -146,7 +144,8 @@ public class LoadHTML {
 			HttpURLConnection hConnect = (HttpURLConnection) newUrl.openConnection();
 //          hConnect.setDefaultRequestProperty("http.agent", "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT");
 			hConnect.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT");
-
+//			hConnect.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 6.0; ONE TOUCH 4033X Build/MRA58K; wv) AppleWebKit/537.36" +
+//					"(KHTML, like Gecko) Version/4.0 Chrome/44.0.2403.119 Mobile Safari/537.36");
 			// 读取内容
 
 			InputStreamReader mInputStreamReader = new InputStreamReader(

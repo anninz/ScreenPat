@@ -1,6 +1,5 @@
 package com.thq.pat.plug.catgirl.patfactory;
 
-import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -57,6 +56,11 @@ public abstract class AbsPat implements IPat {
             handler.sendEmptyMessage(NEXTACTION);
         }
 
+        public void end() {
+            handler.removeMessages(NEXTACTION);
+            handler.removeMessages(IDLE);
+        }
+
         private final Handler handler =new Handler(){
             public void handleMessage(Message msg){
 
@@ -85,11 +89,6 @@ public abstract class AbsPat implements IPat {
                 }
             }
         };
-
-        public void end() {
-            handler.removeMessages(NEXTACTION);
-            handler.removeMessages(IDLE);
-        }
 
         public Action getNextAction() {
             if (actions.size() == 0) {

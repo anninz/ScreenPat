@@ -1,30 +1,35 @@
 package com.thq.pat;
 
-import java.io.File;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
 import android.app.AlarmManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.gesture.Gesture;
+import android.gesture.GestureLibraries;
+import android.gesture.GestureLibrary;
+import android.gesture.GestureOverlayView;
+import android.gesture.Prediction;
 import android.os.IBinder;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.thq.pat.ScreenListener.ScreenStateListener;
 import com.thq.pat.contentfactory.ContentFactory;
-import com.thq.pat.patfactory.HatchFlyFactory;
-import com.thq.pat.plugapilib.IHatchProvider;
 import com.thq.pat.patfactory.HatchRoachFactory;
+import com.thq.pat.plugapilib.IHatchProvider;
 import com.thq.pat.plugapilib.IPat;
 import com.thq.pat.plugapilib.IPlugAPI;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import dalvik.system.DexClassLoader;
 
@@ -117,6 +122,8 @@ public class FxService extends BaseService implements IPlugAPI {
         mContentFactory.downloadContent();
         
         showInfo = new ShowInfo(this);
+
+        initGestureDetect();
 
 //        SharedPreferences sp = getSharedPreferences("data", Context.MODE_PRIVATE);
 //        int patSize = sp.getInt("patnum",1);
@@ -247,7 +254,7 @@ public class FxService extends BaseService implements IPlugAPI {
     @Override
     public int getInt(String key, int id) {
         SharedPreferences sp = getSharedPreferences("data", Context.MODE_PRIVATE);
-        return sp.getInt("size",45);
+        return sp.getInt(key,45);
     }
 
     public void updateView(ImageView view, LayoutParams layoutParams) {
@@ -256,11 +263,86 @@ public class FxService extends BaseService implements IPlugAPI {
 
     @Override
     public Context getContext() {
-//        T.pt("","");
         return getApplicationContext();
     }
 
+    @Override
     public void updateShowInfo(int index) {
         showInfo.updateShowInfo(index);
     }
+
+    @Override
+    public void detectGesture(MotionEvent motionEvent) {
+        mGestureBuilder.dispatchTouchEvent(motionEvent);
+    }
+
+    GestureBuilder mGestureBuilder = new GestureBuilder(this);    // 手势库
+    GestureLibrary mGestureLib;
+    private void initGestureDetect() {
+        mGestureBuilder.setGestureStrokeType(GestureOverlayView.GESTURE_STROKE_TYPE_SINGLE);
+//        mGestureBuilder.setFadeOffset(1000); // 多笔画每两次的间隔时间
+//        mGestureBuilder.setOrientation(90);
+        // 手势识别的监听器
+        mGestureBuilder.addOnGesturePerformedListener(new GestureBuilder.OnGesturePerformedListener() {
+            @Override
+            public void onGesturePerformed(GestureBuilder overlay,
+                                           Gesture gesture) {
+                // 从手势库中查询匹配的内容，匹配的结果可能包括多个相似的结果，匹配度高的结果放在最前面
+                ArrayList<Prediction> predictions = mGestureLib
+                        .recognize(gesture);
+//                Log.d(TAG, "onGesturePerformed: " + predictions.size());
+                if (predictions.size() > 0) {
+                    Prediction prediction = (Prediction) predictions.get(0);
+                    // 匹配的手势
+//                    showBitmap(gesture);
+                    if (prediction.score > 3.0) { // 越匹配score的值越大，最大为10
+                        Intent intent = new Intent();
+                        intent.setClass(FxService.this, MainActivity.class);
+                        FxService.this.startActivity(intent);
+//                        Log.d(TAG, "onGesturePerformed: " + " "+prediction.score + "  -- " + prediction.name);
+                    }
+                }
+            }
+        });
+        loadGestureLib();
+    }
+
+    private void loadGestureLib() {
+        mGestureLib = GestureLibraries.fromFile("/sdcard/thqpat/sina/mygestures");
+        //【2】导入自定义gesture lib。
+        if(!mGestureLib.load()){
+            Toast.makeText(this, "无法load入自定义手势！", Toast.LENGTH_LONG).show();
+        }
+    }
+/*
+    private void showBitmap(Gesture gesture) {
+            //加载save.xml界面布局代表的视图
+        LayoutInflater inflater = LayoutInflater.from(getApplication());
+            View saveDialog = inflater.inflate(
+                    R.layout.save, null);
+            // 获取saveDialog里的show组件
+            ImageView imageView = (ImageView) saveDialog
+                    .findViewById(R.id.show);
+            // 获取saveDialog里的gesture_name组件
+            final EditText gestureName = (EditText) saveDialog
+                    .findViewById(R.id.gesture_name);
+            // 根据Gesture包含的手势创建一个位图
+            Bitmap bitmap = gesture.toBitmap(128, 128, 10, 0xFFFF0000);
+            imageView.setImageBitmap(bitmap);
+            //使用对话框显示saveDialog组件
+        AlertDialog alert;
+        alert =  new AlertDialog.Builder(FxService.this)
+                    .setView(saveDialog)
+                    .setPositiveButton("保存", new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog,
+                                            int which)
+                        {
+                        }
+                    })
+                    .setNegativeButton("取消", null).create();
+        alert.getWindow().setType((WindowManager.LayoutParams.TYPE_SYSTEM_ALERT));//service need add the flag.
+        alert.show();
+    }*/
 }

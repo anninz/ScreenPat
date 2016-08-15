@@ -8,8 +8,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
-import com.thq.pat.plugapilib.IPlugAPI;
-
 public class Utils {
 
     /**

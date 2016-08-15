@@ -4,20 +4,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.inputmethod.EditorInfo;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SeekBar;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.thq.pat.permission.PermissionManager;
@@ -33,6 +31,10 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar seekBarSize;
     private SeekBar seekBarAlphe;
     int patSize = 60;
+    int patAlpha = 255;
+
+    SharedPreferences mSP;
+    SharedPreferences.Editor mEditor;
 
     private EditText patNum;
 
@@ -44,6 +46,9 @@ public class MainActivity extends AppCompatActivity {
         mPermissionManager = new PermissionManager(this);
         mPermissionManager.requestLaunchPermissions();
 
+
+        mSP = getSharedPreferences("data", Context.MODE_PRIVATE);
+        mEditor = mSP.edit();
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
@@ -92,21 +97,22 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress,
                                           boolean fromUser) {
-                int strength = 0;
+                patAlpha = progress;
+                setPrePatAlpha(progress);
             }
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                Log.i(TAG, "user has started a touch gesture");
-                //startTouch = true;
-                //Log.i(TAG, "onStartTrackingTouch():startTouch = "+startTouch);
+                prePatView.setVisibility(View.VISIBLE);
             }
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
-                Log.i(TAG, "user has finished a touch gesture");
-                //startTouch = false;
-                //Log.i(TAG, "onStopTrackingTouch():startTouch = "+startTouch);
-                //handler.removeCallbacks(mHideRunnable);
-                //handler.postDelayed(mHideRunnable, 3000);
+                prePatView.setVisibility(View.GONE);
+                setSPInt("alpha", patAlpha);
+                Intent intent = new Intent();
+                intent.setPackage(getPackageName());
+//                intent.setClass(MainActivity.this, ActionListener.ActionBroadcastReceiver.class);//Warning:cant avaiable via the way,
+                intent.setAction(ActionListener.MY_ACTION_CHANGE_PAT_ALPHA);
+                sendBroadcast(intent);
             }
         });
 
@@ -118,27 +124,13 @@ public class MainActivity extends AppCompatActivity {
             public void onProgressChanged(SeekBar seekBar, int progress,
                                           boolean fromUser) {
                 patSize = progress + 30;
-/*                switch (progress)
-                {
-                    case 1:  strength = 10; break;
-                    case 2:  strength = 15; break;
-                    case 3:  strength = 20; break;
-                    case 4:  strength = 25; break;
-                    case 5:  strength = 30; break;
-                    case 6:  strength = 35; break;
-                    case 7:  strength = 40; break;
-                    case 8:  strength = 45; break;
-                    case 9:  strength = 50; break;
-                    case 10: strength = 55;break;
-                    default: strength = 60;
-                }*/
                 setPrePatSize(patSize);
-                Log.d(TAG,"1 onProgressChanged() strength="+patSize);
+//                Log.d(TAG,"1 onProgressChanged() strength="+patSize);
             }
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 prePatView.setVisibility(View.VISIBLE);
-                Log.i(TAG, "user has started a touch gesture");
+//                Log.i(TAG, "user has started a touch gesture");
                 //startTouch = true;
                 //Log.i(TAG, "onStartTrackingTouch():startTouch = "+startTouch);
             }
@@ -151,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
 //                intent.setClass(MainActivity.this, ActionListener.ActionBroadcastReceiver.class);//Warning:cant avaiable via the way,
                 intent.setAction(ActionListener.MY_ACTION_CHANGE_PAT_SIZE);
                 sendBroadcast(intent);
-                Log.i(TAG, "user has finished a touch gesture");
+//                Log.i(TAG, "user has finished a touch gesture");
                 //startTouch = false;
                 //Log.i(TAG, "onStopTrackingTouch():startTouch = "+startTouch);
                 //handler.removeCallbacks(mHideRunnable);
@@ -168,6 +160,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        patSize = mSP.getInt("size", 45);
+        patAlpha = mSP.getInt("alpha", 255);
+        setPrePatAlpha(patAlpha);
+        setPrePatSize(patSize);
+        seekBarAlphe.setProgress(patAlpha);
+        seekBarSize.setProgress(patSize);
     }
 
     /**
@@ -209,11 +207,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
+/*
     public static boolean isFirstTime(Context context) {
         SharedPreferences sp = context.getSharedPreferences("tips", Context.MODE_PRIVATE);
         return sp.getBoolean("firstTime", true);
-    }
+    }*/
 
     private void setSPString(String key, String value) {
         SharedPreferences sp = getSharedPreferences("data", Context.MODE_PRIVATE);
@@ -223,10 +221,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setSPInt(String key, int value) {
-        SharedPreferences sp = getSharedPreferences("data", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sp.edit();
-        editor.putInt(key, value);
-        editor.commit();
+//        SharedPreferences sp = getSharedPreferences("data", Context.MODE_PRIVATE);
+//        SharedPreferences.Editor editor = sp.edit();
+        mEditor.putInt(key, value);
+        mEditor.commit();
     }
 
     void setPrePatSize(int size) {
@@ -234,5 +232,35 @@ public class MainActivity extends AppCompatActivity {
         layoutParams.height = size;
         layoutParams.width  = size;
         prePatView.setLayoutParams(layoutParams);
+    }
+    void setPrePatAlpha(int alpha) {
+        prePatView.setAlpha(alpha);
+    }
+
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            Intent intent = new Intent();
+            intent.setClass(MainActivity.this, AddGestureActivity.class);
+            startActivity(intent);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

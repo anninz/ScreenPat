@@ -22,10 +22,10 @@ import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 
 import com.thq.pat.ActionListener;
-import com.thq.pat.PatSkin;
 import com.thq.pat.FxService;
+import com.thq.pat.ui.PatSkin;
 import com.thq.pat.R;
-import com.thq.pat.Utils;
+import com.thq.pat.plugapilib.Utils;
 
 import java.util.List;
 import java.util.Map;

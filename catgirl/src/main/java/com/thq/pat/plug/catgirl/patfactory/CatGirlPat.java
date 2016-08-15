@@ -36,6 +36,7 @@ public class CatGirlPat extends AbsPat {
     final static int UPDATE_PAT = 101;
     final static int UPDATE_PAT_DONE = 102;
     public final static String MY_ACTION_CHANGE_PAT_SIZE = "change.pat.size.MY_ACTION";
+    public final static String MY_ACTION_CHANGE_PAT_ALPHA = "change.pat.alpha.MY_ACTION";
 
     //定义浮动窗口布局
     FrameLayout mFloatLayout;
@@ -53,6 +54,7 @@ public class CatGirlPat extends AbsPat {
 
     boolean isPatDie = false;
     int patSize = 45;
+    int patAlpha = 255;
 
     Map<String,List> mSkinMaps;
 
@@ -108,18 +110,25 @@ public class CatGirlPat extends AbsPat {
     @Override
     public void sleep() {
         isActive = false;
+        myActions.end();
     }
 
     @Override
     public void wakeUp() {
         isActive = true;
+        myActions.start();
     }
 
     @Override
     public void command(String action) {
         if (MY_ACTION_CHANGE_PAT_SIZE.equals(action)) {
             patSize = mContext.getInt("size",45);
+            patSize = Utils.dpToPixel(patSize);
             myPatView.setViewSize(patSize);
+        } else if (MY_ACTION_CHANGE_PAT_ALPHA.equals(action)) {
+            patAlpha = mContext.getInt("alpha",255);
+            wmPatParams.alpha = patAlpha / 255f;
+            mContext.updateView(mFloatLayout, wmPatParams);
         }
     }
 
@@ -175,6 +184,9 @@ public class CatGirlPat extends AbsPat {
         // 设置悬浮窗口长宽数据
         wmPatParams.width = LayoutParams.WRAP_CONTENT;
         wmPatParams.height = LayoutParams.WRAP_CONTENT;
+
+        patAlpha = mContext.getInt("alpha",255);
+        wmPatParams.alpha = patAlpha / 255f;
     }
     
     private void commandPatToDo() {
@@ -267,7 +279,7 @@ public class CatGirlPat extends AbsPat {
                         @Override
                         public Bitmap callback(View view) {
                             lastIndex = ++lastIndex % runs.size();
-                            view.postInvalidateDelayed(200l);
+                            view.postInvalidateDelayed(150l);
                             return runs.get(lastIndex);
                         }
                     });

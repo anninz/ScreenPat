@@ -31,5 +31,12 @@
                 <action android:name="android.intent.action.CHOOSE_PAT"/>
             </intent-filter>
         </activity>
+        <activity android:label="@string/app_name"
+            android:name="com.thq.pat.AddGestureActivity"
+            android:theme="@style/AppTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.ADD_GESTURE"/>
+            </intent-filter>
+        </activity>
     </application>
 </manifest>

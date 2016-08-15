@@ -10,6 +10,7 @@ public class ActionListener {
 
 
     public final static String MY_ACTION_CHANGE_PAT_SIZE = "change.pat.size.MY_ACTION";
+    public final static String MY_ACTION_CHANGE_PAT_ALPHA = "change.pat.alpha.MY_ACTION";
 
     private Context mContext;
     private ActionBroadcastReceiver mActionReceiver;
@@ -29,9 +30,12 @@ public class ActionListener {
         @Override
         public void onReceive(Context context, Intent intent) {
             action = intent.getAction();
-            if (action.equals(MY_ACTION_CHANGE_PAT_SIZE)) {
-                mActionListener.action(MY_ACTION_CHANGE_PAT_SIZE);
-            }
+//            if (action.equals(MY_ACTION_CHANGE_PAT_SIZE)) {
+//                mActionListener.action(MY_ACTION_CHANGE_PAT_SIZE);
+//            } else if (action.equals(MY_ACTION_CHANGE_PAT_ALPHA)) {
+//                mActionListener.action(MY_ACTION_CHANGE_PAT_ALPHA);
+//            }
+                mActionListener.action(action);
         }
     }
 
@@ -58,6 +62,7 @@ public class ActionListener {
     private void registerListener() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(MY_ACTION_CHANGE_PAT_SIZE);
+        filter.addAction(MY_ACTION_CHANGE_PAT_ALPHA);
         mContext.registerReceiver(mActionReceiver, filter);
     }
 

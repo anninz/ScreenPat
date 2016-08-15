@@ -1,9 +1,5 @@
 package com.thq.pat.patfactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.Log;
@@ -11,7 +7,11 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.thq.pat.FxService;
-import com.thq.pat.Utils;
+import com.thq.pat.plugapilib.Utils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public abstract class AbsShitProvider {
 

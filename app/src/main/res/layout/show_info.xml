@@ -29,6 +29,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:padding="4dp"
             android:id="@+id/showinfo"
             />
         <com.thq.pat.image.ui.TouchView
@@ -48,7 +49,8 @@
             android:layout_gravity="bottom|right"
             android:src="@drawable/ic_add_white"
             android:background="@drawable/fab_selector"
-            tools:ignore="ContentDescription"/>
+            tools:ignore="ContentDescription"
+            android:rotation="45"/>
     </com.thq.pat.common.ShadowLayout>
 
 </FrameLayout>

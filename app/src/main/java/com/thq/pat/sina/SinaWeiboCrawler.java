@@ -1,19 +1,20 @@
 package com.thq.pat.sina;
 
+import android.util.Log;
+
+import com.thq.pat.contentfactory.ContentFactory;
+import com.thq.pat.sina.provider.ParseXml;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 //import org.apache.http.client.ClientProtocolException;
-
-import android.util.Log;
-
-import com.thq.pat.contentfactory.ContentFactory;
-import com.thq.pat.sina.provider.ParseXml;
 
 /** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * @filename Crawler.java
@@ -56,7 +57,7 @@ public class SinaWeiboCrawler implements Runnable {
 	            return;
 	        }
 
-	        String[] searchwords = {"冷笑话", "头条", "娱乐", "科技新闻", "秒拍视频"
+	        String[] searchwords = {"冷笑话", "头条", "娱乐", "科技新闻", "秒拍视频" , "Apple"
 	                /*"samsung", "iPhone6", "htc", "huawei", "xiaomi", "zte", "lenovo", "mx", "coolpad",
 				"google", "IBM", "Microsoft", "Amazon", "Intel", "Apple"*/};
 	        File dirGetTweetSub = new File(Utils.myPath + "/tweethtml/");
@@ -66,15 +67,17 @@ public class SinaWeiboCrawler implements Runnable {
 	        File dirGetTweetXmlSub = new File(Utils.myPath + "/tweetxml/");
 	        dirGetTweetXmlSub.mkdirs();
 	        for(int n=0; n<searchwords.length; n++) {
-	            String searchword = searchwords[n];
-	            String dirPath = Utils.myPath + "/tweethtml/" + searchword;
+//	            String searchword = searchwords[n];
+	            String searchword = URLEncoder.encode(searchwords[n], "utf-8");//add by hongqi URL should be UTF-8 for chinese.
+	            String dirPath = Utils.myPath + "/tweethtml/" + searchwords[n];
 	            File f = new File(dirPath);
 	            f.mkdirs();
 	            int totalPage = 1;
 	            System.out.println("Start to download html pages of the topic: " + searchword);
 	            String html;
 	            for(int i=totalPage; i>0; i--) {
-	                html = new LoadHTML().downloadPage("http://s.weibo.com/weibo/" + searchword + "&Refer=STopic_box");
+//	                html = new LoadHTML().downloadPage("http://s.weibo.com/weibo/" + searchword + "&Refer=STopic_box");
+					html = GetPostUtil.sendGet("http://s.weibo.com/weibo/" + searchword + "&Refer=STopic_box");
 	                int iReconn = 0;
 	                while("null".equals(html)) {
 	                    html = new LoadHTML().downloadPage("http://s.weibo.com/weibo/" + searchword + "&Refer=STopic_box");
@@ -102,17 +105,17 @@ public class SinaWeiboCrawler implements Runnable {
 	                //				Log.e("THQ html", html);
 	                //				FileWR.writeString(html, dirPath + "/" + searchword + i + ".html");
 //	                if (!isExistResult(html)) break;//FC 
-	                FileWR.writeFile(html, dirPath + "/" + searchword + i + ".html");
+	                FileWR.writeFile(html, dirPath + "/" + searchwords[n] + i + ".html");
 	            }
 	            //			System.out.println("topic \"" + searchword + "\"crawling has been done!****");
 	            //			System.out.println("Begin writing the tweets to local files: txt & xml");
-	            Log.i(TAG + "THQ", "topic \"" + searchword + "\"crawling has been done!****");
+	            Log.i(TAG + "THQ", "topic \"" + searchwords[n] + "\"crawling has been done!****");
 	            Log.i(TAG + "THQ", "Begin writing the tweets to local files: txt & xml");
-	            String saveTXTPath = Utils.myPath + "/tweettxt/" + searchword + ".txt";
+	            String saveTXTPath = Utils.myPath + "/tweettxt/" + searchwords[n] + ".txt";
 	            HTMLParser htmlParser = new HTMLParser();
-	            Vector<String> tweets = htmlParser.write2txt(searchword, dirPath, saveTXTPath);
+	            Vector<String> tweets = htmlParser.write2txt(searchwords[n], dirPath, saveTXTPath);
 
-	            String saveXMLPath = Utils.myPath + "/tweetxml/" + "/" + searchword + ".xml";
+	            String saveXMLPath = Utils.myPath + "/tweetxml/" + "/" + searchwords[n] + ".xml";
 	            htmlParser.writeVector2xml(tweets, saveXMLPath);
 	            //			htmlParser.createSinaXML(tweets, saveXMLPath);
 //	            System.out.println("Save to txt & xml files succeed.");

@@ -18,11 +18,10 @@ import android.view.WindowManager.LayoutParams;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
 
-
+import com.thq.pat.plug.PatSkin;
 import com.thq.pat.plug.R;
 import com.thq.pat.plugapilib.AbsShitProvider;
 import com.thq.pat.plugapilib.IPlugAPI;
-import com.thq.pat.plug.PatSkin;
 import com.thq.pat.plugapilib.RoachShitFactory;
 import com.thq.pat.plugapilib.Utils;
 
@@ -37,6 +36,7 @@ public class FlyPat extends AbsPat {
     final static int UPDATE_PAT = 101;
     final static int UPDATE_PAT_DONE = 102;
     public final static String MY_ACTION_CHANGE_PAT_SIZE = "change.pat.size.MY_ACTION";
+    public final static String MY_ACTION_CHANGE_PAT_ALPHA = "change.pat.alpha.MY_ACTION";
 
     //定义浮动窗口布局
     FrameLayout mFloatLayout;
@@ -54,6 +54,7 @@ public class FlyPat extends AbsPat {
 
     boolean isPatDie = false;
     int patSize = 45;
+    int patAlpha = 255;
 
     Map<String,List> mSkinMaps;
 
@@ -120,6 +121,7 @@ public class FlyPat extends AbsPat {
     @Override
     public void sleep() {
         isActive = false;
+        myActions.end();
 /*        handler.removeMessages(ActionSeries.IDLE);
         handler.removeMessages(ActionSeries.RUN);
         handler.removeMessages(ActionSeries.AMAZED);
@@ -132,6 +134,7 @@ public class FlyPat extends AbsPat {
     @Override
     public void wakeUp() {
         isActive = true;
+        myActions.start();
 //        handler.sendEmptyMessage(ActionSeries.IDLE);
     }
 
@@ -140,7 +143,12 @@ public class FlyPat extends AbsPat {
         if (MY_ACTION_CHANGE_PAT_SIZE.equals(action)) {
 //            SharedPreferences sp = mContext.getSharedPreferences("data", Context.MODE_PRIVATE);
             patSize = mContext.getInt("size",45);
+            patSize = Utils.dpToPixel(patSize);
             myPatView.setViewSize(patSize);
+        } else if (MY_ACTION_CHANGE_PAT_ALPHA.equals(action)) {
+            patAlpha = mContext.getInt("alpha",255);
+            wmPatParams.alpha = patAlpha / 255f;
+            mContext.updateView(mFloatLayout, wmPatParams);
         }
     }
 
@@ -202,6 +210,9 @@ public class FlyPat extends AbsPat {
         // 设置悬浮窗口长宽数据
         wmPatParams.width = LayoutParams.WRAP_CONTENT;
         wmPatParams.height = LayoutParams.WRAP_CONTENT;
+
+        patAlpha = mContext.getInt("alpha",255);
+        wmPatParams.alpha = patAlpha / 255f;
     }
     
     private void commandPatToDo() {
@@ -285,7 +296,7 @@ public class FlyPat extends AbsPat {
                         @Override
                         public Bitmap callback(View view) {
                             lastIndex = ++lastIndex % moves.size();
-                            view.postInvalidateDelayed(200l);
+                            view.postInvalidateDelayed(150l);
                             return moves.get(lastIndex);
                         }
                     });

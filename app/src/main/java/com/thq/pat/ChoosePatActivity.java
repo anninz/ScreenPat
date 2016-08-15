@@ -1,13 +1,11 @@
 package com.thq.pat;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,20 +14,11 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.SeekBar;
-import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.thq.pat.permission.PermissionManager;
-import com.thq.pat.plugapilib.IHatchProvider;
 import com.thq.pat.widget.DividerItemDecoration;
 import com.thq.pat.widget.RecyclerItemClickListener;
 
@@ -45,16 +34,8 @@ import dalvik.system.DexClassLoader;
 public class ChoosePatActivity extends BaseActivity {
     private static final String TAG = "MainActivity";
 
-    private PermissionManager mPermissionManager;
-    private boolean mIsNoGrantResults = false;
     private Toolbar mToolbar;
 
-    private ImageView prePatView;
-    private SeekBar seekBarSize;
-    private SeekBar seekBarAlphe;
-    int patSize = 60;
-
-    private EditText patNum;
 
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLayoutManager;
@@ -96,6 +77,14 @@ public class ChoosePatActivity extends BaseActivity {
     public void onStop() {
         super.onStop();
         for (ViewHolder viewHolder:mHolder) {
+            if (viewHolder.patNum > 0) {
+                StringBuffer stringBuffer = new StringBuffer();
+                stringBuffer.append(viewHolder.patNum + "#");
+                stringBuffer.append(viewHolder.apkPath + "#");
+                stringBuffer.append(viewHolder.mTextView.getText().toString());
+                mSet.add(stringBuffer.toString());
+            }
+/*
             if (viewHolder.mCheckBox.isChecked()) {
                 StringBuffer stringBuffer = new StringBuffer();
                 stringBuffer.append(viewHolder.mEditText.getText().toString() + "#");
@@ -103,6 +92,7 @@ public class ChoosePatActivity extends BaseActivity {
                 stringBuffer.append(viewHolder.mTextView.getText().toString());
                 mSet.add(stringBuffer.toString());
             }
+*/
         }
         setSPSet("PatSet", mSet);
     }
@@ -166,11 +156,6 @@ public class ChoosePatActivity extends BaseActivity {
         }
     }
 
-    public static boolean isFirstTime(Context context) {
-        SharedPreferences sp = context.getSharedPreferences("tips", Context.MODE_PRIVATE);
-        return sp.getBoolean("firstTime", true);
-    }
-
     private void setSPString(String key, String value) {
         SharedPreferences sp = getSharedPreferences("data", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
@@ -192,13 +177,6 @@ public class ChoosePatActivity extends BaseActivity {
         editor.commit();
     }
 
-    void setPrePatSize(int size) {
-        ViewGroup.LayoutParams layoutParams = prePatView.getLayoutParams();
-        layoutParams.height = size;
-        layoutParams.width  = size;
-        prePatView.setLayoutParams(layoutParams);
-    }
-
     class Pat {
         String patName;
         Bitmap patIcon;
@@ -215,32 +193,45 @@ public class ChoosePatActivity extends BaseActivity {
 
         public ImageView mImageView;
 
-        public EditText mEditText;
+        public SeekBar mSeekBar;
+
+        public TextView mPatNum;
+
+        int patNum;
+
+//        public EditText mEditText;
 //        Spinner mSpinner;
 
-        public CheckBox mCheckBox;
+//        public CheckBox mCheckBox;
 
         public String apkPath;
 //        public int position;
 
         public ViewHolder(View v) {
             super(v);
-//
-//            List<String> list = new ArrayList<String>();
-//            list.add("1");
-//            list.add("2");
-//            list.add("3");
-//            list.add("4");
-
-//            ArrayAdapter<String> adapter=new ArrayAdapter<String>(ChoosePatActivity.this, android.R.layout.simple_spinner_item,list);
-//            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
             mTextView = (TextView) v.findViewById(R.id.news_title);
             mImageView = (ImageView) v.findViewById(R.id.pat_image);
-            mEditText = (EditText) v.findViewById(R.id.pat_num);
-            mCheckBox = (CheckBox) v.findViewById(R.id.checkbox);
+            mSeekBar = (SeekBar) v.findViewById(R.id.pat_num);
+            mPatNum = (TextView) v.findViewById(R.id.pat_num_hint);
+
+
+//            mEditText = (EditText) v.findViewById(R.id.pat_num);
+//            mCheckBox = (CheckBox) v.findViewById(R.id.checkbox);
 //            mSpinner = (Spinner) v.findViewById(R.id.spinner1);
 //            mSpinner.setAdapter(adapter);
+
+            mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    patNum = progress;
+                    mPatNum.setText(patNum + "只");
+                }
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) { }
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) { }
+            });
         }
     }
 

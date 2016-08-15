@@ -31,8 +31,8 @@ import android.widget.FrameLayout;
 import com.thq.pat.ActionListener;
 import com.thq.pat.FxService;
 import com.thq.pat.R;
-import com.thq.pat.RotateImageView;
-import com.thq.pat.Utils;
+import com.thq.pat.plugapilib.Utils;
+import com.thq.pat.ui.RotateImageView;
 
 import java.util.Map;
 import java.util.Random;
@@ -66,6 +66,7 @@ public class RoachPat extends AbsPat {
     boolean isPatDie = false;
     boolean isDoneCurrentTask = true;
     int patSize = 45;
+    int patAlpha = 255;
 
     Map<String,Bitmap> mSkinMaps;
         
@@ -149,6 +150,11 @@ public class RoachPat extends AbsPat {
             SharedPreferences sp = mContext.getSharedPreferences("data", Context.MODE_PRIVATE);
             patSize =sp.getInt("size",45);
             myPatView.setViewSize(patSize);
+        } else if (ActionListener.MY_ACTION_CHANGE_PAT_ALPHA.equals(action)) {
+            SharedPreferences sp = mContext.getSharedPreferences("data", Context.MODE_PRIVATE);
+            patAlpha =sp.getInt("alpha",45);
+            wmPatParams.alpha = patAlpha / 255f;
+            mContext.updateView(mFloatLayout, wmPatParams);
         }
     }
 
@@ -172,6 +178,7 @@ public class RoachPat extends AbsPat {
              //刷新
             mContext.updateView(mFloatLayout, wmPatParams);
             isDraged = true;
+            mContext.detectGesture(event);//detect custom gesture
             return false;  //此处必须返回false，否则OnClickListener获取不到监听
         }
     };
@@ -211,6 +218,10 @@ public class RoachPat extends AbsPat {
         // 设置悬浮窗口长宽数据
         wmPatParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
         wmPatParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+
+        SharedPreferences sp = mContext.getSharedPreferences("data", Context.MODE_PRIVATE);
+        patAlpha =sp.getInt("alpha",45);
+        wmPatParams.alpha = patAlpha / 255f;
     }
     
     private void commandPatToDo() {
@@ -409,7 +420,7 @@ public class RoachPat extends AbsPat {
     
     
     private void shit() {
-        int shit = mRandomGenerator.nextInt(5);
+        int shit = mRandomGenerator.nextInt(10);
 
         Log.i(TAG, " shit " + shit);
         if (shit == 1 ) {
@@ -485,7 +496,7 @@ public class RoachPat extends AbsPat {
         xValue.setInterpolator(new LinearInterpolator());
         xValue.start();
 
-        shit();
+//        shit();
         doPatAnim();
 
     }
