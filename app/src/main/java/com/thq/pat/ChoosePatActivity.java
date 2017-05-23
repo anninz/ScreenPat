@@ -23,6 +23,10 @@ import com.thq.pat.widget.DividerItemDecoration;
 import com.thq.pat.widget.RecyclerItemClickListener;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -63,6 +67,8 @@ public class ChoosePatActivity extends BaseActivity {
         mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(this, onItemClickListener));
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
+        checkIfHaveNewPat();
+
         mSet = new HashSet<>();
         // specify an adapter (see also next example)
         myDataset = new ArrayList<>();
@@ -70,7 +76,6 @@ public class ChoosePatActivity extends BaseActivity {
         isHost = true;
         mAdapter = new MyAdapter(this, myDataset);
         mRecyclerView.setAdapter(mAdapter);
-
     }
 
     @Override
@@ -286,4 +291,67 @@ public class ChoosePatActivity extends BaseActivity {
         public void onItemClick(View view, int position) {
         }
     };
+
+    private boolean checkIfHaveNewPat() {
+        String myApkDir = "/sdcard/thqpat/apk";
+        File dir = new File(myApkDir);
+        if (!dir.exists()) dir.mkdir();
+        File[] allFiles = dir.listFiles();
+//        Log.d("THQ", "getFiles  success! allFiles = " + allFiles);
+        if (allFiles == null) return false;
+        for (int i = 0; i < allFiles.length; i++) {
+            File file = allFiles[i];
+            if (file.isFile() && file.getName().endsWith(".apk")) {
+                Log.i("THQ", "checkIfHaveNewPat " + file.getName());
+                copyApk2DataDir(file);
+            }
+        }
+        return false;
+    }
+
+    private void copyApk2DataDir(File apkFile) {
+        InputStream in = null;
+        FileOutputStream out = null;
+//        String path = this.getApplicationContext().getFilesDir()
+//                .getAbsolutePath() + "/dynamicapk/" + apkFile.getName(); // data/data目录
+        String path = "/data/data/" + getPackageName() + "/dynamicapk/" + apkFile.getName(); // data/data目录
+        File file = new File(path);
+        if (!file.exists()) {
+            try {
+                Log.i("THQ", "start copy Apk 2 DataDir " + file.getAbsolutePath());
+//                in = this.getAssets().open("db/mydb.db3"); // 从assets目录下复制
+                in = new FileInputStream(apkFile); // 从sdcard目录下复制
+                out = new FileOutputStream(file);
+                int length = -1;
+                byte[] buf = new byte[1024];
+                while ((length = in.read(buf)) != -1) {
+                    out.write(buf, 0, length);
+                }
+                out.flush();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (in != null) {
+                    try {
+
+                        in.close();
+
+                    } catch (IOException e1) {
+
+                        // TODO Auto-generated catch block
+
+                        e1.printStackTrace();
+                    }
+                }
+                if (out != null) {
+                    try {
+                        out.close();
+                    } catch (IOException e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
 }

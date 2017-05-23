@@ -28,7 +28,7 @@ dependencies {
 
 
 task mkCat(type: Exec, dependsOn: 'assembleDebug') {
-    def keyPath = "/local/sourcecode/TclCamera/EspAppTools/androidM_signed"
+    def keyPath = "/home/tianhongqi/sourcecode/MTKcode/EspAppTools/androidM_signed"
     def appPath = "."
     def moduleName = this.name;
     commandLine keyPath + '/mkPlug.sh' , keyPath , appPath , moduleName

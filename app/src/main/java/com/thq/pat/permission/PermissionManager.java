@@ -177,6 +177,7 @@ public class PermissionManager {
                 PackageManager.PERMISSION_GRANTED);
 
         for (int i = 0; i < permissions.length; i++) {
+            Log.d(TAG, "THQ isCameraLaunchPermissionsResultReady: " + permissions[i]);
             perms.put(permissions[i], grantResults[i]);
         }
 

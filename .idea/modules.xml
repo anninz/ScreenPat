@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/ScreenPat.iml" filepath="$PROJECT_DIR$/ScreenPat.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/catgirl/catgirl.iml" filepath="$PROJECT_DIR$/catgirl/catgirl.iml" />
+      <module fileurl="file://$PROJECT_DIR$/fly/fly.iml" filepath="$PROJECT_DIR$/fly/fly.iml" />
+      <module fileurl="file://$PROJECT_DIR$/plugapilibrary/plugapilibrary.iml" filepath="$PROJECT_DIR$/plugapilibrary/plugapilibrary.iml" />
+    </modules>
+  </component>
+</project>

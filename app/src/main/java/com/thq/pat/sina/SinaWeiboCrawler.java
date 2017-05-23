@@ -49,7 +49,7 @@ public class SinaWeiboCrawler implements Runnable {
 	        //no need to Crawl,if downloaded in a hour.
 	        ArrayList<File> fileList = new ArrayList<File>();
 	        ParseXml.getFiles(fileList, Utils.myPath + "/tweetxml/");
-	        Log.i(TAG + "THQ starttime", "starttime = " + starttime 
+	        Log.i(TAG, "THQ " + "starttime = " + starttime
 	                + " lasttime = " + (fileList.size() > 0?(fileList.get(0).lastModified()):"0")
 	                );
 	        if (fileList.size() > 0 && (fileList.get(0).lastModified() + 3600000) > starttime) { 

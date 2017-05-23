@@ -196,9 +196,9 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 // more than one critical permission was denied
                 // activity finish, exit and destroy
-                Toast.makeText(this, R.string.denied_required_permission,
-                        Toast.LENGTH_LONG).show();
-                finish();
+//                Toast.makeText(this, R.string.denied_required_permission,
+//                        Toast.LENGTH_LONG).show();
+                //finish();
             }
         } else {
             super.onRequestPermissionsResult(requestCode, permissions,
