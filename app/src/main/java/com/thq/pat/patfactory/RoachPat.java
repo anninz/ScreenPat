@@ -50,7 +50,7 @@ public class RoachPat extends AbsPat {
     
     //定义浮动窗口布局
     FrameLayout mFloatLayout;
-    LayoutParams wmPatParams;
+    WindowManager.LayoutParams wmPatParams;
     RotateImageView myPatView;
     
     
@@ -77,7 +77,7 @@ public class RoachPat extends AbsPat {
 
     @Override
     public void startLife() {
-        wmPatParams = new LayoutParams();
+        wmPatParams = new WindowManager.LayoutParams(WindowManager.LayoutParams.TYPE_TOAST);
         initPatParams(wmPatParams);
         //获取浮动窗口视图所在布局
         LayoutInflater inflater = LayoutInflater.from(mContext.getApplication());
@@ -196,7 +196,7 @@ public class RoachPat extends AbsPat {
 
     private void initPatParams(WindowManager.LayoutParams wmPatParams) {
         //设置window type
-        wmPatParams.type = LayoutParams.TYPE_TOAST; 
+        //wmPatParams.type = LayoutParams.TYPE_TOAST;
         //设置图片格式，效果为背景透明
         wmPatParams.format = PixelFormat.RGBA_8888; 
         //设置浮动窗口不可聚焦（实现操作除浮动窗口外的其他可见窗口的操作）
