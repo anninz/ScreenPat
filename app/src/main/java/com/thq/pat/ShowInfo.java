@@ -183,25 +183,33 @@ public class ShowInfo {
             }
             break;
         case 4:
-            mShowInfoText = "你踩到屎了！！！！！";
+//            mShowInfoText = "你踩到屎了！！！！！";
+            mShowInfoText = "“老婆，今天饭菜很丰富呐，不出去吃？”出差七天，刚回来的老公说。\n" +
+                    "女人抬了抬头，却不回答他。\n" +
+                    "他在屋里转悠转悠，看见了自己的遗照。\n" +
+                    "——《出差七天》";
             break;
 /*        case 5:
             mShowInfoText = "憋踩了!!!";
             break;*/
         case 26:
-            mShowInfoText = "疼!!!好疼!!!踩!!!踩了!!!!";
+//            mShowInfoText = "疼!!!好疼!!!踩!!!踩了!!!!";
+            mShowInfoText = "1 error，1 warning";
             break;
         case 27:
-            mShowInfoText = "开开心心的哦!!!!";
+//            mShowInfoText = "开开心心的哦!!!!";
+            mShowInfoText = "If you are still looking for that one person who will change your life,take look in the mirror.\n\n --unknown";
         case 21:
-            mShowInfoText = "虚脱了，拉不粗来了!!!!";
+//            mShowInfoText = "虚脱了，拉不粗来了!!!!";
+            mShowInfoText = "小时候刮奖刮出‘谢’字还不扔，非要把‘谢谢惠顾’都刮的干干净净才舍得放手，和后来太多的事一模一样。";
             break;
         case 100:
             mShowInfoText = "拉的屎太多了，赶紧去扫一下!!!!";
             break;
 
         default:
-            mShowInfoText = "你要走蟑螂屎运！！！！！";
+//            mShowInfoText = "你要走蟑螂屎运！！！！！";
+            mShowInfoText = "广告位招租！";
             break;
         }
         handler.sendEmptyMessage(SHOW_INFO);

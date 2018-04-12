@@ -153,6 +153,7 @@ public class Fragment_0 extends Fragment {
         pat1.patIcon = appIcon1;
         pat1.patName = appName1;
         pat1.apkPath = "Host";
+        pat1.defaultNum = 1;
         myDataset.add(pat1);
 
 //        String dexOutputDir = getApplicationInfo().dataDir;
@@ -231,6 +232,7 @@ public class Fragment_0 extends Fragment {
         String patName;
         Bitmap patIcon;
         String apkPath;
+        int defaultNum;
     }
 
 
@@ -322,6 +324,7 @@ public class Fragment_0 extends Fragment {
             BitmapDrawable bd = new BitmapDrawable(getResources(), pat.patIcon);
             holder.mImageView.setImageDrawable(bd);
             holder.apkPath = pat.apkPath;
+            holder.mSeekBar.setProgress(pat.defaultNum);
         }
 
         // Return the size of your dataset (invoked by the layout manager)

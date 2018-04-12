@@ -164,7 +164,12 @@ public class CatGirlPat extends AbsPat {
 
     private void initPatParams(LayoutParams wmPatParams) {
         //设置window type
-        wmPatParams.type = LayoutParams.TYPE_TOAST;
+        final int version = Build.VERSION.SDK_INT;
+        if (version >= 19) {
+            wmPatParams.type = LayoutParams.TYPE_PHONE;
+        } else {
+            wmPatParams.type = LayoutParams.TYPE_TOAST;
+        }
         //设置图片格式，效果为背景透明
         wmPatParams.format = PixelFormat.RGBA_8888;
         //设置浮动窗口不可聚焦（实现操作除浮动窗口外的其他可见窗口的操作）

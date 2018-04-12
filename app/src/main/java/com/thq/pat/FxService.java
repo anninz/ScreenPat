@@ -99,7 +99,7 @@ public class FxService extends BaseService implements IPlugAPI {
         mWindowManager = (WindowManager)getApplication().getSystemService(getApplication().WINDOW_SERVICE);
         Log.i(TAG, "mWindowManager--->" + mWindowManager);
         DisplayMetrics metrics = new DisplayMetrics();
-        mWindowManager.getDefaultDisplay().getMetrics(metrics);
+        mWindowManager.getDefaultDisplay().getMetrics(metrics);//之前出现过因为minSDK 版本太低而分辨率很低，一直没有找到原因。
         maxPixels = Math.max(metrics.heightPixels, metrics.widthPixels);
         minPixels = Math.min(metrics.heightPixels, metrics.widthPixels);
         

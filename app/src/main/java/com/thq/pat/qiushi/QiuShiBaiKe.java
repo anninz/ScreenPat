@@ -71,6 +71,10 @@ Disallow: /login
 
             //      URL newUrl = new URL(pageUrl);
             HttpURLConnection hConnect = (HttpURLConnection) pageUrl.openConnection();
+            String redirect = hConnect.getHeaderField("Location");//as qiushi redirect to https,we need detect if is https.
+            if (redirect != null){
+                hConnect = (HttpURLConnection) new URL(redirect).openConnection();
+            }
             //      hConnect.setDefaultRequestProperty("http.agent", "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT");
             hConnect.setRequestProperty("User-Agent", "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT");
 //            hConnect.setRequestProperty("User-Agent", "Mozilla/5.0 (Linux; Android 6.0; ONE TOUCH 4033X Build/MRA58K; wv) AppleWebKit/537.36" +

@@ -1,9 +1,11 @@
 package com.thq.pat;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -18,12 +20,14 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
+import com.thq.pat.permission.GetFloatWindowPermission;
 import com.thq.pat.permission.PermissionManager;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
     private PermissionManager mPermissionManager;
+    private GetFloatWindowPermission mGetFloatWP;
     private boolean mIsNoGrantResults = false;
     private Toolbar mToolbar;
 
@@ -45,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_store);
         mPermissionManager = new PermissionManager(this);
         mPermissionManager.requestLaunchPermissions();
-
+        mGetFloatWP = new GetFloatWindowPermission(this);
 
         mSP = getSharedPreferences("data", Context.MODE_PRIVATE);
         mEditor = mSP.edit();
@@ -67,6 +71,20 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v)
             {
                 // TODO Auto-generated method stub
+                if (!GetFloatWindowPermission.isFloatWindowOpAllowed(MainActivity.this)) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("获取悬浮窗权限");
+                    builder.setMessage("因该ROM的限制，需要手动获取悬浮窗的权限才能显示宠物，现在跳转到设置界面，打开‘权限管理’界面，并勾选‘悬浮窗’选项！");
+                    builder.setPositiveButton("跳转", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            mGetFloatWP.requestPermission();
+                        }
+                    });
+                    builder.setNegativeButton("取消", null);
+                    builder.show();
+                }
+
                 Intent intent = new Intent(MainActivity.this, FxService.class);
                 String num = "1";//patNum.getText().toString();
                 setSPInt("patnum",Integer.parseInt("".equals(num)?"1":num));
@@ -205,6 +223,14 @@ public class MainActivity extends AppCompatActivity {
             super.onRequestPermissionsResult(requestCode, permissions,
                     grantResults);
             return;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 11){
+            mGetFloatWP.onActivityResult(requestCode,resultCode,data);
         }
     }
 
