@@ -63,7 +63,7 @@ public class ParseXml {
 //        return tweets;
     }
     
-    public static void parserSinaXmls(ArrayList<Tweet> tweets, String xmlDir) {
+    public static void  parserSinaXmls(ArrayList<Tweet> tweets, String xmlDir) {
 
 //        ArrayList<Tweet> tweets = new ArrayList<Tweet>();
         try {

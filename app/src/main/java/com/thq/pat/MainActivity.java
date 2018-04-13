@@ -23,6 +23,9 @@ import android.widget.Toast;
 import com.thq.pat.permission.GetFloatWindowPermission;
 import com.thq.pat.permission.PermissionManager;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
@@ -47,17 +50,18 @@ public class MainActivity extends AppCompatActivity {
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_store);
+
+        mSP = getSharedPreferences("data", Context.MODE_PRIVATE);
+        mEditor = mSP.edit();
+        GetFloatWindowPermission.hasGrantedByManual = mSP.getBoolean("hasGrantedByManual", false);
+
         mPermissionManager = new PermissionManager(this);
         mPermissionManager.requestLaunchPermissions();
         mGetFloatWP = new GetFloatWindowPermission(this);
 
-        mSP = getSharedPreferences("data", Context.MODE_PRIVATE);
-        mEditor = mSP.edit();
-
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
         mToolbar.setTitle(R.string.app_name);
-
 
         //获取启动按钮
         Button start = (Button)findViewById(R.id.start_id);
@@ -70,27 +74,22 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v)
             {
-                // TODO Auto-generated method stub
-                if (!GetFloatWindowPermission.isFloatWindowOpAllowed(MainActivity.this)) {
-                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                    builder.setTitle("获取悬浮窗权限");
-                    builder.setMessage("因该ROM的限制，需要手动获取悬浮窗的权限才能显示宠物，现在跳转到设置界面，打开‘权限管理’界面，并勾选‘悬浮窗’选项！");
-                    builder.setPositiveButton("跳转", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            mGetFloatWP.requestPermission();
-                        }
-                    });
-                    builder.setNegativeButton("取消", null);
-                    builder.show();
-                }
-
-                Intent intent = new Intent(MainActivity.this, FxService.class);
-                String num = "1";//patNum.getText().toString();
-                setSPInt("patnum",Integer.parseInt("".equals(num)?"1":num));
-                //启动FxService
-                startService(intent);
+                SharedPreferences sp = getSharedPreferences("data", Context.MODE_PRIVATE);
+                Set<String> set = new HashSet<>();
+                set = sp.getStringSet("PatSet",set);
+                if (set.size() <= 0) {
+                    Toast.makeText(MainActivity.this, R.string.hint_to_pick_pat,
+                            Toast.LENGTH_LONG).show();
+                } else if (!mGetFloatWP.isFloatWindowOpAllowed(MainActivity.this)) {
+                    showGetWPDialog();//to get GWP.
+                } else {
+                    Intent intent = new Intent(MainActivity.this, FxService.class);
+                    String num = "1";//patNum.getText().toString();
+                    setSPInt("patnum", Integer.parseInt("".equals(num) ? "1" : num));
+                    //启动FxService
+                    startService(intent);
 //                finish();
+                }
             }
         });
 
@@ -179,7 +178,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        patSize = mSP.getInt("size", 45);
+        patSize = mSP.getInt("size", 60);
         patAlpha = mSP.getInt("alpha", 255);
         setPrePatAlpha(patAlpha);
         setPrePatSize(patSize);
@@ -218,6 +217,8 @@ public class MainActivity extends AppCompatActivity {
 //                Toast.makeText(this, R.string.denied_required_permission,
 //                        Toast.LENGTH_LONG).show();
                 //finish();
+                if (!GetFloatWindowPermission.hasGrantedByManual)
+                    showGetWPDialog();//to get GWP.
             }
         } else {
             super.onRequestPermissionsResult(requestCode, permissions,
@@ -289,5 +290,27 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showGetWPDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+        builder.setTitle("获取悬浮窗权限");
+        builder.setMessage("    因该ROM的限制，需要手动获取悬浮窗的权限才能显示宠物，现在跳转到设置界面，打开‘权限管理’界面，并勾选‘悬浮窗’选项！\n   如果你已经手动授权，请点击已授权，谢谢！");
+        builder.setPositiveButton("跳转", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                mGetFloatWP.requestPermission();
+            }
+        });
+        builder.setNeutralButton("已授权", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                GetFloatWindowPermission.hasGrantedByManual = true;
+                mEditor.putBoolean("hasGrantedByManual", true);
+                mEditor.commit();
+            }
+        });
+        builder.setNegativeButton("取消", null);
+        builder.show();
     }
 }

@@ -65,7 +65,7 @@ public class RoachPat extends AbsPat {
     
     boolean isPatDie = false;
     boolean isDoneCurrentTask = true;
-    int patSize = 45;
+    int patSize = 60;
     int patAlpha = 255;
 
     Map<String,Bitmap> mSkinMaps;
@@ -93,7 +93,7 @@ public class RoachPat extends AbsPat {
         myPatView.setOnClickListener(mPatClickListener);
 
         SharedPreferences sp = mContext.getSharedPreferences("data", Context.MODE_PRIVATE);
-        patSize =sp.getInt("size",45);
+        patSize =sp.getInt("size",60);
         myPatView.setViewSize(patSize);
 
         myPatView.setSkin(mSkinMaps);
@@ -225,7 +225,7 @@ public class RoachPat extends AbsPat {
         wmPatParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
 
         SharedPreferences sp = mContext.getSharedPreferences("data", Context.MODE_PRIVATE);
-        patAlpha =sp.getInt("alpha",45);
+        patAlpha =sp.getInt("alpha",255);
         wmPatParams.alpha = patAlpha / 255f;
     }
     

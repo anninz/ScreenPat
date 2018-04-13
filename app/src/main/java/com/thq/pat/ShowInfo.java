@@ -209,7 +209,8 @@ public class ShowInfo {
 
         default:
 //            mShowInfoText = "你要走蟑螂屎运！！！！！";
-            mShowInfoText = "广告位招租！";
+            mShowInfoText = "\n" +
+                    "       广告位招租！\n";
             break;
         }
         handler.sendEmptyMessage(SHOW_INFO);

@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -54,6 +55,7 @@ public class Fragment_1 extends Fragment {
     private Set<String> mSet;
     List<ViewHolder> mHolder;
     Handler mHandle;
+    String SDCard;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View mView=inflater.inflate(R.layout.activity_recycler_view1, container, false);
@@ -72,6 +74,8 @@ public class Fragment_1 extends Fragment {
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
 
 //        checkIfHaveNewPat();
+
+        SDCard= Environment.getExternalStorageDirectory()+"";
 
         mSet = new HashSet<>();
         // specify an adapter (see also next example)
@@ -104,7 +108,7 @@ public class Fragment_1 extends Fragment {
                      mRecyclerView.setAdapter(mAdapter);
                      break;
                  case DONE_APK:
-                     Toast.makeText(getActivity(),"Download Done!",Toast.LENGTH_LONG).show();
+                     Toast.makeText(getActivity(),"从微信扣款成功，并下载完成!",Toast.LENGTH_LONG).show();
                      break;
                  default:
                      break;
@@ -203,6 +207,10 @@ public class Fragment_1 extends Fragment {
         String patName;
         Bitmap patIcon;
         String apkPath;
+        String price;
+        String describe;
+        String downloaded;
+        String size;
     }
 
 
@@ -212,6 +220,10 @@ public class Fragment_1 extends Fragment {
     public class ViewHolder extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         public TextView mTextView;
+        public TextView mPriceView;
+        public TextView mDescriblView;
+        public TextView mDownloadedView;
+        public TextView mSizeView;
 
         public ImageView mImageView;
 
@@ -232,7 +244,11 @@ public class Fragment_1 extends Fragment {
         public ViewHolder(View v) {
             super(v);
 
-            mTextView = (TextView) v.findViewById(R.id.news_title);
+            mTextView = (TextView) v.findViewById(R.id.online_pat_title);
+            mPriceView = (TextView) v.findViewById(R.id.online_pat_price);
+            mDescriblView = (TextView) v.findViewById(R.id.online_pat_describe);
+            mDownloadedView = (TextView) v.findViewById(R.id.online_pat_downloaded);
+            mSizeView = (TextView) v.findViewById(R.id.online_pat_size);
             mImageView = (ImageView) v.findViewById(R.id.pat_image);
             mDownload = (Button) v.findViewById(R.id.download);
 
@@ -280,9 +296,20 @@ public class Fragment_1 extends Fragment {
             // - replace the contents of the view with that element
             final Pat pat = mDataset.get(position);
             holder.mTextView.setText(pat.patName);
+            holder.mPriceView.setText("价格:"+pat.price);
+            holder.mDescriblView.setText(pat.describe);
+            holder.mDownloadedView.setText("下载:"+pat.downloaded);
+            holder.mSizeView.setText("大小:"+pat.size);
             BitmapDrawable bd = new BitmapDrawable(getResources(), pat.patIcon);
             holder.mImageView.setImageDrawable(bd);
             holder.apkPath = pat.apkPath;
+
+            final String destfile=SDCard+"/thqpat/apk/"+pat.apkPath;
+            if(new File("/data/data/" + getActivity().getPackageName() + "/dynamicapk/"+pat.apkPath).exists()){
+                Log.i("downloadPlugApk", "file is exist!");
+                holder.mDownload.setText("已下载");
+                holder.mDownload.setEnabled(false);
+            }
             holder.mDownload.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -290,7 +317,7 @@ public class Fragment_1 extends Fragment {
                         @Override
                         public void run() {
                             //downloadPlugApk(pat.patName);
-                            downloadPlugApk(pat.patName,null);
+                            downloadPlugApk(pat.apkPath,destfile);
                             mHandle.sendEmptyMessage(DONE_APK);
                         }
                     }).start();
@@ -382,7 +409,7 @@ public class Fragment_1 extends Fragment {
      * @Date: 2011-3-25~2011-3-25
      */
     public void downloadTxt() {
-        String urlStr="http://igee.xin:8080/screenpat/info.txt";
+        String urlStr="http://igee.xin:8080/screenpat/";
         Log.i("THQ", "downloadTxt begin");
         try {
                 /*
@@ -390,21 +417,39 @@ public class Fragment_1 extends Fragment {
                  * 要网络连接成功，需在AndroidMainfest.xml中进行权限配置
                  * <uses-permission android:name="android.permission.INTERNET" />
                  */
-            URL url=new URL(urlStr);
+            URL url=new URL(urlStr + "info.txt");
             HttpURLConnection conn=(HttpURLConnection)url.openConnection();
             //取得inputStream，并进行读取
             InputStream input=conn.getInputStream();
             BufferedReader in=new BufferedReader(new InputStreamReader(input));
             String line=null;
+
+            File apkDir = new File(SDCard + "/thqpat/apk/");//第一次进入时，或者thppat被用户删除后，需重新mkdir。
+            if (!apkDir.exists()) {
+                apkDir.mkdirs();
+            }
+
             StringBuffer sb=new StringBuffer();
             while((line=in.readLine())!=null){
                 sb.append(line);
+                String splits[] = line.split(",");
                 Pat pat1 = new Pat();
-                String appName1 = "蟑螂";
-                Bitmap appIcon1 = BitmapFactory.decodeResource(getResources(), R.drawable.pic8);
+                String picName = splits[2];
+                String destFile = SDCard + "/thqpat/apk/" + picName;//目标文件存储路径
+                Bitmap appIcon1;
+                downloadPic(urlStr + "/plugapk/" + picName, destFile);
+                if(new File(destFile).exists()){
+                    appIcon1 = BitmapFactory.decodeFile(destFile);
+                } else {
+                    appIcon1 = BitmapFactory.decodeResource(getResources(),R.drawable.pic8);
+                }
                 pat1.patIcon = appIcon1;
-                pat1.patName = line;
-                pat1.apkPath = "Host";
+                pat1.patName = splits[0];
+                pat1.apkPath = splits[1];
+                pat1.price = splits[3];
+                pat1.describe = splits[4];
+                pat1.downloaded = splits[5];
+                pat1.size = splits[6];
                 myDataset.add(pat1);
             }
             Log.i("THQ", sb.toString());
@@ -415,6 +460,103 @@ public class Fragment_1 extends Fragment {
             e.printStackTrace();
         }
     }
+
+    public class DownLoadImage extends AsyncTask<String, Void, Bitmap> {
+        Bitmap tmpBitmap;
+        public DownLoadImage(Bitmap imageView) {
+            this.tmpBitmap = imageView;
+        }
+        @Override
+        protected Bitmap doInBackground(String... urls) {
+            //1，直接接在数据流
+/*            String url = urls[0];
+            Bitmap tmpBitmap = null;
+            try {
+                InputStream is = new java.net.URL(url).openStream();
+                tmpBitmap = BitmapFactory.decodeStream(is);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return tmpBitmap;*/
+
+            //2，先保存到本地
+            String url = urls[0];
+            Bitmap tmpBitmap = null;
+            try {
+                InputStream is = new java.net.URL(url).openStream();
+                URL u = new URL(url);
+                HttpURLConnection conn = (HttpURLConnection) u.openConnection();
+                Bitmap bitmap = BitmapFactory.decodeStream(is);
+                // 判断是否有内存卡
+                if (Environment.getExternalStorageState().equals(
+                        Environment.MEDIA_MOUNTED)) {
+                    // 保存图片到本地
+                    String fileName = urls[1];
+                    String filePath = SDCard + "/thqpat/" + fileName;
+                    FileOutputStream fos = new FileOutputStream(filePath);
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                }
+                // 关闭流
+                is.close();
+                conn.disconnect();
+                return bitmap;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return tmpBitmap;
+        }
+        @Override
+        protected void onPostExecute(Bitmap result) {
+            tmpBitmap = result;
+        }
+    }
+
+    /**
+     *
+     * @Project: Android_MyDownload
+     * @Desciption: 只能读取文本文件，读取mp3文件会出现内存溢出现象
+     * @Author: LinYiSong
+     * @Date: 2011-3-25~2011-3-25
+     */
+    public void downloadPic(String urlStr,String destFile) {
+        if(new File(destFile).exists()){
+            return;
+        } else {
+            try {
+                final long startTime = System.currentTimeMillis();
+                Log.e("DOWNLOAD", "error: " + startTime);
+                //下载函数
+                String filename = urlStr.substring(urlStr.lastIndexOf("/") + 1);
+                //获取文件名
+                URL myURL = new URL(urlStr);
+                URLConnection conn = myURL.openConnection();
+                conn.connect();
+                InputStream is = conn.getInputStream();
+                int fileSize = conn.getContentLength();//根据响应获取文件大小
+                Log.e("DOWNLOAD", "error: " + fileSize);
+                if (fileSize <= 0) throw new RuntimeException("无法获知文件大小 ");
+                if (is == null) throw new RuntimeException("stream is null");
+                //把数据存入路径+文件名
+                FileOutputStream fos = new FileOutputStream(destFile);
+                byte buf[] = new byte[1024];
+                int downLoadFileSize = 0;
+                do {
+                    //循环读取
+                    int numread = is.read(buf);
+                    if (numread == -1) {
+                        break;
+                    }
+                    fos.write(buf, 0, numread);
+                    downLoadFileSize += numread;
+                    //更新进度条
+                } while (true);
+                is.close();
+            } catch (Exception ex) {
+                Log.e("DOWNLOAD", "error: " + ex.getMessage(), ex);
+            }
+        }
+    }
+
     /**
      *
      * @Project: Android_MyDownload
@@ -422,10 +564,10 @@ public class Fragment_1 extends Fragment {
      * @Author: LinYiSong
      * @Date: 2011-3-25~2011-3-25
      *
+     * 这个方法，下个9kb的图片都会出问题
      *
      * 该方法会导致下载下来的apk有问题，使用新的下载方案：downloadPlugApk(String patName, String destfile)
      */
-
     public void downloadPlugApk(String patName) {
         String urlStr="http://igee.xin:8080/screenpat/plugapk/"+patName;
         String path="thqpat/apk";
@@ -491,16 +633,15 @@ public class Fragment_1 extends Fragment {
 
     public void downloadPlugApk(String patName, String destfile) {
         String urlStr="http://igee.xin:8080/screenpat/plugapk/"+patName;
-        String path=Environment.getExternalStorageDirectory().getAbsolutePath()+"/thqpat/apk/"+patName;
-        try{
+        try {
             //下载路径，如果路径无效了，可换成你的下载路径
             //String url = "http://c.qijingonline.com/test.mkv";
             //String path = Environment.getExternalStorageDirectory().getAbsolutePath();
 
             final long startTime = System.currentTimeMillis();
-            Log.i("DOWNLOAD","startTime="+startTime);
+            Log.i("DOWNLOAD", "startTime=" + startTime);
             //下载函数
-            String filename=urlStr.substring(urlStr.lastIndexOf("/") + 1);
+            String filename = urlStr.substring(urlStr.lastIndexOf("/") + 1);
             //获取文件名
             URL myURL = new URL(urlStr);
             URLConnection conn = myURL.openConnection();
@@ -509,27 +650,26 @@ public class Fragment_1 extends Fragment {
             int fileSize = conn.getContentLength();//根据响应获取文件大小
             if (fileSize <= 0) throw new RuntimeException("无法获知文件大小 ");
             if (is == null) throw new RuntimeException("stream is null");
-            //File file1 = new File(path);
-            //if(!file1.exists()){
-            //    file1.mkdirs();
-            //}
+//                File file1 = new File(path);
+//                if(!file1.exists()){
+//                    file1.mkdirs();
+//                }
             //把数据存入路径+文件名
-            FileOutputStream fos = new FileOutputStream(path);
+            FileOutputStream fos = new FileOutputStream(destfile);
             byte buf[] = new byte[1024];
             int downLoadFileSize = 0;
-            do{
+            do {
                 //循环读取
                 int numread = is.read(buf);
-                if (numread == -1)
-                {
+                if (numread == -1) {
                     break;
                 }
                 fos.write(buf, 0, numread);
                 downLoadFileSize += numread;
                 //更新进度条
             } while (true);
-            Log.i("DOWNLOAD","download success");
-            Log.i("DOWNLOAD","totalTime="+ (System.currentTimeMillis() - startTime));
+            Log.i("DOWNLOAD", "download success");
+            Log.i("DOWNLOAD", "totalTime=" + (System.currentTimeMillis() - startTime));
             is.close();
         } catch (Exception ex) {
             Log.e("DOWNLOAD", "error: " + ex.getMessage(), ex);

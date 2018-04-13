@@ -311,7 +311,7 @@ public class FxService extends BaseService implements IPlugAPI {
         mGestureLib = GestureLibraries.fromFile("/sdcard/thqpat/sina/mygestures");
         //【2】导入自定义gesture lib。
         if(!mGestureLib.load()){
-            Toast.makeText(this, "无法load入自定义手势！", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "暂无自定义手势！", Toast.LENGTH_LONG).show();
         }
     }
 /*

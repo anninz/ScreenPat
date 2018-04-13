@@ -1,14 +1,17 @@
 package com.thq.pat.permission;
 
+import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.AppOpsManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.provider.Settings;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -19,6 +22,7 @@ import java.lang.reflect.Method;
 public class GetFloatWindowPermission {
 
     AppCompatActivity mContext;
+    public static boolean hasGrantedByManual = false;
     public GetFloatWindowPermission(AppCompatActivity context) {
         mContext = context;
     }
@@ -62,9 +66,9 @@ public class GetFloatWindowPermission {
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(isFloatWindowOpAllowed(mContext)){//已经开启
-
+//            Toast.makeText(mContext,"开启悬浮窗成功",Toast.LENGTH_SHORT).show();
         }else {
-            //Toast.makeText(mContext,"开启悬浮窗失败",Toast.LENGTH_SHORT).show();
+//            Toast.makeText(mContext,"开启悬浮窗失败",Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -75,10 +79,11 @@ public class GetFloatWindowPermission {
      * @return
      */
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    public static boolean isFloatWindowOpAllowed(Context context) {
+    public boolean isFloatWindowOpAllowed(Context context) {
         final int version = Build.VERSION.SDK_INT;
         if (version >= 19) {
-            return checkOp(context, 24);  // AppOpsManager.OP_SYSTEM_ALERT_WINDOW
+            return  hasGrantedByManual && commonROMPermissionCheck(mContext) && checkOp(context, 24);  // AppOpsManager.OP_SYSTEM_ALERT_WINDOW,check FWP from both ContextCompat and AppOpsManager,
+            // because vivo AppOpsManager is true ,but ContextCompat is false.
         } else {
             if ((context.getApplicationInfo().flags & 1 << 27) == 1 << 27) {
                 return true;
@@ -100,7 +105,7 @@ public class GetFloatWindowPermission {
                 Method method = manager.getClass().getDeclaredMethod("checkOp", int.class, int.class, String.class);
                 int property = (Integer) method.invoke(manager, op,
                         Binder.getCallingUid(), context.getPackageName());
-                Log.e("399"," property: " + property);
+                Log.e("isFloatWindowOpAllowed"," property: " + property);
 
                 if (AppOpsManager.MODE_ALLOWED == property) {
                     return true;
@@ -115,4 +120,33 @@ public class GetFloatWindowPermission {
         }
         return false;
     }
+
+    /**
+     * check Float Windows Permission by checkSelfPermission.
+     *
+     * @return whether the Float-Windows permission be granted.
+     */
+    public boolean checkFWPermission() {
+        return (ContextCompat.checkSelfPermission(mContext, Manifest.permission.SYSTEM_ALERT_WINDOW)
+                == PackageManager.PERMISSION_GRANTED);
+    }
+
+    //判断权限
+    private boolean commonROMPermissionCheck(Context context) {
+        Boolean result = false;
+        if (Build.VERSION.SDK_INT >= 23) {
+            try {
+                Class clazz = Settings.class;
+                Method canDrawOverlays = clazz.getDeclaredMethod("canDrawOverlays", Context.class);
+                result = (Boolean) canDrawOverlays.invoke(null, context);
+//                if (Settings.canDrawOverlays(context)) {
+//                    Log.i("commonROMPCheck", "context granted");
+//                }
+            } catch (Exception e) {
+                Log.e("commonROMPCheck", Log.getStackTraceString(e));
+            }
+        }
+        return result;
+    }
+
 }

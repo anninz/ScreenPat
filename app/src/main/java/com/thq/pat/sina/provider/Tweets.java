@@ -60,8 +60,8 @@ public class Tweets {
 	}
 	
 	public void loadFromXml() {
-	    synchronized (ContentFactory.sinaTweet) {
+	    //synchronized (ContentFactory.sinaTweet) {
 	        ParseXml.parserSinaXmls(tweets, Utils.myPath + "/tweetxml/");
-	    }
+	    //}
     }
 }

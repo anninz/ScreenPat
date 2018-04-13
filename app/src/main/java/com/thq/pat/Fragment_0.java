@@ -67,9 +67,9 @@ public class Fragment_0 extends Fragment {
         mSet = new HashSet<>();
         // specify an adapter (see also next example)
         myDataset = new ArrayList<>();
-        LoadClass();
+//        LoadClass();
 //        isHost = true;
-        ((FragmentInteraction)getActivity()).process("change");
+//        ((FragmentInteraction)getActivity()).process("change");
         mAdapter = new MyAdapter(getActivity(), myDataset);
         mRecyclerView.setAdapter(mAdapter);
     }
@@ -98,6 +98,15 @@ public class Fragment_0 extends Fragment {
         setSPSet("PatSet", mSet);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d("onResume", "onResume");
+        myDataset.clear();
+        LoadClass();
+        ((FragmentInteraction)getActivity()).process("change");
+        mAdapter.notifyDataSetChanged();
+    }
 
     /**
      * 用来与外部activity交互的
@@ -164,18 +173,18 @@ public class Fragment_0 extends Fragment {
         File dir = new File(apkdir);
         if (!dir.exists()) dir.mkdir();
         File[] allFiles = dir.listFiles();
-        Log.d("THQ", "getFiles  success! allFiles = " + allFiles);
+        Log.d("LoadClass", "getFiles  success! allFiles = " + allFiles);
         if (allFiles == null) return;
         for (int i = 0; i < allFiles.length; i++) {
             File file = allFiles[i];
-            Log.d("THQ", "file.isFile() = " + file.isFile());
+            //Log.d("LoadClass", "file.isFile() = " + file.isFile());
             if (file.isFile()) {
 
 //                Log.d("THQ", "getFiles  success! file = " + file.getPath() + " " + file.getAbsolutePath());
                 classLoader = new DexClassLoader(file.getAbsolutePath(),tmpDir.getAbsolutePath(),null,getActivity().getClassLoader());
                 ((FragmentInteraction)(getActivity())).process(file.getPath());
 
-                Log.d("THQ", "classLoader = " + classLoader);
+//                Log.d("LoadClass", "classLoader = " + classLoader);
                 try{
                     if (classLoader != null) {
                         Class clazz = classLoader.loadClass("com.thq.pat.plug.HatchFactory");
@@ -188,7 +197,6 @@ public class Fragment_0 extends Fragment {
 
                         Pat pat = new Pat();
                         Method getAppName = clazz.getMethod("getAppName", Context.class);
-                        Log.d("THQ", "getAppName = " + getAppName);
 
                         String appName = (String)getAppName.invoke(null, getActivity());
                         Method getAppIcon = clazz.getMethod("getAppIcon", Context.class);
@@ -196,6 +204,7 @@ public class Fragment_0 extends Fragment {
                         pat.patIcon = appIcon;
                         pat.patName = appName;
                         pat.apkPath = file.getPath();
+//                        Log.d("LoadClass", "getAppName = " + appName + appIcon + file.getPath());
                         myDataset.add(pat);
 //                        myDataset[i] = appName;
 

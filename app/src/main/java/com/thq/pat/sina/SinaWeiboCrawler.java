@@ -43,7 +43,7 @@ public class SinaWeiboCrawler implements Runnable {
 	}
 
 	public void doCrawl() throws /*ClientProtocolException,*/ URISyntaxException, IOException, InterruptedException {
-	    synchronized (ContentFactory.sinaTweet) {
+	   // synchronized (ContentFactory.sinaTweet) {
 	        long starttime = System.currentTimeMillis();
 
 	        //no need to Crawl,if downloaded in a hour.
@@ -53,7 +53,7 @@ public class SinaWeiboCrawler implements Runnable {
 	                + " lasttime = " + (fileList.size() > 0?(fileList.get(0).lastModified()):"0")
 	                );
 	        if (fileList.size() > 0 && (fileList.get(0).lastModified() + 3600000) > starttime) { 
-                ContentFactory.sinaTweet.notifyAll();//notify Tweets to load XML.
+                //ContentFactory.sinaTweet.notifyAll();//notify Tweets to load XML.
 	            return;
 	        }
 
@@ -126,8 +126,8 @@ public class SinaWeiboCrawler implements Runnable {
 	            Log.i(TAG + "THQ",(double)(endtime-starttime)/60000 + "mins");
 	            
 	        }
-	        ContentFactory.sinaTweet.notifyAll();//notify Tweets to load XML.
-	    }
+//	        ContentFactory.sinaTweet.notifyAll();//notify Tweets to load XML.
+	   // }
 //		System.out.println("----end------");
 	}
 

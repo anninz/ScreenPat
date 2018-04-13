@@ -8,6 +8,7 @@
     <string name="title_activity_splash">SplashActivity</string>
 
     <string name="denied_required_permission">"Permission denied. You can change permissions in Settings->Apps."</string>
+    <string name="hint_to_pick_pat">"请先挑选宠物！"</string>
 
     <string name="gesture_name">手势名</string>
 
